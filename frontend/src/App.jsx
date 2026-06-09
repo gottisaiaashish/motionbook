@@ -5,9 +5,9 @@ import './App.css';
 
 // A simple protected route component
 const ProtectedRoute = ({ children }) => {
-  // if (!isAuthenticated()) {
-  //   return <Navigate to="/login" replace />;
-  // }
+  if (!isAuthenticated()) {
+    return <Navigate to="/login" replace />;
+  }
   return children;
 };
 

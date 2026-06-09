@@ -41,14 +41,14 @@ const AuthPage = () => {
     try {
       if (isLogin) {
         await login(email, password);
-        window.location.href = 'https://motionbook.vercel.app';
+        navigate('/');
       } else {
         if (!otpSent) {
           await handleSendOTP(e);
           return;
         }
         await register(name, email, password, otp);
-        window.location.href = 'https://motionbook.vercel.app';
+        navigate('/');
       }
     } catch (err) {
       setError(err.message || 'An error occurred. Please try again.');

@@ -1,15 +1,14 @@
-import React from 'react';
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { PlayCircle, LogOut, PlusCircle, Settings, LayoutDashboard } from "lucide-react";
-import { logout } from '../api';
+import { logout } from "../api";
 
-const Dashboard = () => {
+export default function Dashboard() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
-    window.location.reload();
+    navigate("/");
   };
 
   return (
@@ -34,7 +33,10 @@ const Dashboard = () => {
         </nav>
 
         <div className="mt-auto">
-          <button onClick={handleLogout} className="flex w-full items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-xl transition-colors">
+          <button 
+            onClick={handleLogout} 
+            className="flex w-full items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-xl transition-colors"
+          >
             <LogOut className="w-5 h-5" /> Sign out
           </button>
         </div>
@@ -75,5 +77,3 @@ const Dashboard = () => {
     </div>
   );
 }
-
-export default Dashboard;

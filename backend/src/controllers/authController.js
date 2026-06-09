@@ -4,15 +4,21 @@ import nodemailer from 'nodemailer';
 import { User } from '../models/User.js';
 import { OTP } from '../models/OTP.js';
 
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 465,
-  secure: true,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+let transporter = null;
+const getTransporter = () => {
+  if (!transporter) {
+    transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+  }
+  return transporter;
+};
 
 export const sendOTP = async (req, res) => {
   try {
@@ -46,7 +52,7 @@ export const sendOTP = async (req, res) => {
       text: `Your verification code is: ${otp}. It will expire in 5 minutes.`,
     };
 
-    transporter.sendMail(mailOptions)
+    getTransporter().sendMail(mailOptions)
       .then(info => console.log('Email sent successfully:', info.response))
       .catch(err => console.error('Background email error:', err));
     

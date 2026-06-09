@@ -66,13 +66,12 @@ export const sendOTP = async (req, res) => {
       `,
     };
 
-    try {
-      await getTransporter().sendMail(mailOptions);
-      res.status(200).json({ message: 'OTP sent successfully' });
-    } catch (emailError) {
-      console.error('Error sending email:', emailError);
-      res.status(500).json({ message: 'Failed to send email. Check SMTP configuration.' });
-    }
+    // Fire and forget email sending
+    getTransporter().sendMail(mailOptions)
+      .then(() => console.log(`OTP email sent to ${email}`))
+      .catch(emailError => console.error('Error sending email:', emailError));
+      
+    res.status(200).json({ message: 'OTP sent successfully' });
   } catch (error) {
     console.error('Error in sendOTP:', error);
     res.status(500).json({ message: 'Internal server error' });

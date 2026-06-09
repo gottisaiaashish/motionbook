@@ -53,7 +53,7 @@ export const sendOTP = async (req, res) => {
         'content-type': 'application/json'
       },
       body: JSON.stringify({
-        sender: { name: 'Motionbook', email: process.env.EMAIL_USER },
+        sender: { name: 'Motionbook', email: 'support.motionbook@gmail.com' },
         to: [{ email: email }],
         subject: 'Your Motionbook Verification Code',
         htmlContent: htmlContent

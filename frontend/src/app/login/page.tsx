@@ -35,7 +35,7 @@ export default function LoginPage() {
       } else {
         setError(data.message || "Something went wrong");
       }
-    } catch (err) {
+    } catch {
       setError("Failed to connect to the server");
     } finally {
       setLoading(false);

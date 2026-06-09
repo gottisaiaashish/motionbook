@@ -37,7 +37,7 @@ export const sendOTP = async (req, res) => {
       { upsert: true, new: true }
     );
 
-    // Send email
+    // Send email without awaiting so the user gets an instant response
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
@@ -45,7 +45,8 @@ export const sendOTP = async (req, res) => {
       text: `Your verification code is: ${otp}. It will expire in 5 minutes.`,
     };
 
-    await transporter.sendMail(mailOptions);
+    transporter.sendMail(mailOptions).catch(err => console.error('Background email error:', err));
+    
     res.status(200).json({ message: 'OTP sent successfully' });
   } catch (error) {
     console.error('Error sending OTP:', error);

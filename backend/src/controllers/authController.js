@@ -53,7 +53,7 @@ export const sendOTP = async (req, res) => {
         <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; border: 1px solid #eaeaea; border-radius: 12px; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
           <div style="padding: 10px 0; color: #333333; line-height: 1.6;">
             <p style="font-size: 16px; margin-bottom: 20px;">Hello there,</p>
-            <p style="font-size: 16px; margin-bottom: 30px;">Thank you for choosing Motionbook! Please use the following One-Time Password (OTP) to complete your verification process. This code is valid for the next <strong>5 minutes</strong>.</p>
+            <p style="font-size: 16px; margin-bottom: 30px;">Please use the following One-Time Password (OTP) to complete your verification process. This code is valid for the next <strong>5 minutes</strong>.</p>
             <div style="text-align: center; margin: 40px 0;">
               <div style="display: inline-block; padding: 15px 40px; font-size: 36px; font-weight: bold; color: #111111; background-color: #f8f9fa; border: 1px solid #e5e7eb; border-radius: 8px; letter-spacing: 8px;">${otp}</div>
             </div>

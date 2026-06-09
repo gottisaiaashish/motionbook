@@ -1,16 +1,37 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Hyperspeed from './Hyperspeed';
-import { login, register } from '../api';
+import { login, register, sendOTP } from '../api';
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [otp, setOtp] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+
+  const handleSendOTP = async (e) => {
+    e.preventDefault();
+    if (!name || !email || !password) {
+      setError("Please fill all fields before requesting OTP.");
+      return;
+    }
+    setError('');
+    setIsLoading(true);
+    try {
+      await sendOTP(email);
+      setOtpSent(true);
+      setError('');
+    } catch (err) {
+      setError(err.message || 'Failed to send OTP.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,10 +41,15 @@ const AuthPage = () => {
     try {
       if (isLogin) {
         await login(email, password);
+        navigate('/');
       } else {
-        await register(name, email, password);
+        if (!otpSent) {
+          await handleSendOTP(e);
+          return;
+        }
+        await register(name, email, password, otp);
+        navigate('/');
       }
-      navigate('/');
     } catch (err) {
       setError(err.message || 'An error occurred. Please try again.');
     } finally {
@@ -37,6 +63,8 @@ const AuthPage = () => {
     setName('');
     setEmail('');
     setPassword('');
+    setOtp('');
+    setOtpSent(false);
   };
 
   return (
@@ -110,12 +138,29 @@ const AuthPage = () => {
             />
           </div>
 
+          {!isLogin && otpSent && (
+            <div className="flex flex-col gap-2">
+              <label htmlFor="otp" className="text-[#e0e0e0] text-[13px] font-medium tracking-wide uppercase">Verification Code (OTP)</label>
+              <input
+                type="text"
+                id="otp"
+                className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-[14px] text-white text-[15px] transition-all duration-300 focus:outline-none focus:border-white/30 focus:bg-black/50 focus:ring-4 focus:ring-white/5 placeholder:text-gray-500 box-border"
+                placeholder="123456"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                required={!isLogin && otpSent}
+              />
+              <p className="text-xs text-green-400 mt-1">We sent a 6-digit code to your email.</p>
+            </div>
+          )}
+
           <button 
-            type="submit" 
+            type={(!isLogin && !otpSent) ? "button" : "submit"}
+            onClick={(!isLogin && !otpSent) ? handleSendOTP : undefined}
             className="w-full bg-white text-black rounded-xl py-4 text-[16px] font-semibold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(255,255,255,0.3)] hover:bg-[#f0f0f0] active:translate-y-0 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none mt-2 shadow-[0_4px_14px_rgba(255,255,255,0.2)]"
             disabled={isLoading}
           >
-            {isLoading ? 'Processing...' : (isLogin ? 'Sign In' : 'Sign Up')}
+            {isLoading ? 'Processing...' : (isLogin ? 'Sign In' : (otpSent ? 'Verify & Sign Up' : 'Send OTP'))}
           </button>
         </form>
 

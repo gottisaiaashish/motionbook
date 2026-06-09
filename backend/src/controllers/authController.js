@@ -1,9 +1,8 @@
-import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { User } from '../models/User';
+import { User } from '../models/User.js';
 
-export const registerUser = async (req: Request, res: Response): Promise<void> => {
+export const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
@@ -39,7 +38,7 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-export const loginUser = async (req: Request, res: Response): Promise<void> => {
+export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -61,7 +60,7 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-const generateToken = (id: string) => {
+const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET || 'fallback_secret', {
     expiresIn: '30d',
   });

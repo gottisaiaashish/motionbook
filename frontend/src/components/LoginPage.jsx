@@ -17,8 +17,8 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      await login(email, password);
-      navigate("/dashboard");
+      const data = await login(email, password);
+      navigate("/");
     } catch (err) {
       setError(err.message || "Something went wrong");
     } finally {

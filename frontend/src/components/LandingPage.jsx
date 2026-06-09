@@ -1,12 +1,23 @@
 
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Sparkles, PlayCircle, Layers, X, Star, CheckCircle2, Globe, MessageCircle, Mail } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ArrowRight, Sparkles, PlayCircle, Layers, X, Star, CheckCircle2, Globe, MessageCircle, Mail, LogOut } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import Hyperspeed from "./Hyperspeed";
+import { isAuthenticated, logout } from "../api";
 
 export default function LandingPage() {
   const [showDemo, setShowDemo] = useState(false);
+  const navigate = useNavigate();
+  const loggedIn = isAuthenticated();
+  const user = loggedIn ? JSON.parse(localStorage.getItem('user') || '{}') : null;
+  const firstName = user?.name?.split(' ')[0] || 'there';
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+    window.location.reload();
+  };
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white selection:bg-indigo-500/30 overflow-hidden font-sans">
@@ -26,10 +37,24 @@ export default function LandingPage() {
             <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
           </div>
           <div className="flex items-center gap-4">
-            <Link to="/login" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Log in</Link>
-            <Link to="/signup" className="text-sm font-medium bg-white text-black px-4 py-2 rounded-full hover:bg-gray-200 transition-colors">
-              Sign up
-            </Link>
+            {loggedIn ? (
+              <>
+                <span className="text-sm font-medium text-gray-300">Hey, <span className="text-white font-semibold">{firstName}</span> 👋</span>
+                <Link to="/dashboard" className="text-sm font-medium bg-white text-black px-4 py-2 rounded-full hover:bg-gray-200 transition-colors">
+                  Dashboard
+                </Link>
+                <button onClick={handleLogout} className="text-sm text-gray-400 hover:text-red-400 transition-colors flex items-center gap-1">
+                  <LogOut className="w-4 h-4" /> Sign out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Log in</Link>
+                <Link to="/signup" className="text-sm font-medium bg-white text-black px-4 py-2 rounded-full hover:bg-gray-200 transition-colors">
+                  Sign up
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>

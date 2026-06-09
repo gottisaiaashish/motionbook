@@ -34,7 +34,7 @@ export default function SignupPage() {
     setLoading(true);
     try {
       await register(name, email, password, otp);
-      navigate("/dashboard");
+      navigate("/");
     } catch (err) {
       setError(err.message || "Something went wrong");
     } finally {

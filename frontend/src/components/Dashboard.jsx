@@ -16,7 +16,7 @@ const Dashboard = () => {
     <div className="min-h-screen bg-[#0a0a0a] text-white flex">
       
       {/* Sidebar */}
-      <aside className="w-64 border-r border-white/5 bg-black/50 p-6 flex flex-col hidden md:flex">
+      <aside className="w-64 border-r border-white/5 bg-black/50 p-6 flex flex-col">
         <Link to="/" className="flex items-center gap-2 mb-12 hover:opacity-80 transition-opacity">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
             <PlayCircle className="w-5 h-5 text-white" />

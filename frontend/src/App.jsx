@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import AuthPage from './components/AuthPage';
+import LandingPage from './components/LandingPage';
 import { isAuthenticated, logout } from './api';
 import './App.css';
 
@@ -32,8 +33,10 @@ function App() {
     <Router>
       <Routes>
         <Route path="/login" element={<AuthPage />} />
+        <Route path="/signup" element={<AuthPage />} />
+        <Route path="/" element={<LandingPage />} />
         <Route 
-          path="/" 
+          path="/dashboard" 
           element={
             <ProtectedRoute>
               <Home />

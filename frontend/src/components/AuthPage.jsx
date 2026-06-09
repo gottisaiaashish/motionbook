@@ -41,14 +41,14 @@ const AuthPage = () => {
     try {
       if (isLogin) {
         await login(email, password);
-        navigate('/');
+        navigate('/dashboard');
       } else {
         if (!otpSent) {
           await handleSendOTP(e);
           return;
         }
         await register(name, email, password, otp);
-        navigate('/');
+        navigate('/dashboard');
       }
     } catch (err) {
       setError(err.message || 'An error occurred. Please try again.');

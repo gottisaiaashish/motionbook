@@ -21,9 +21,9 @@ export default function LandingPage() {
             <span className="text-xl font-bold tracking-tight">Motionbook</span>
           </Link>
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-300">
-            <a to="#features" className="hover:text-white transition-colors">Features</a>
-            <a to="#explore" className="hover:text-white transition-colors">Explore</a>
-            <a to="#pricing" className="hover:text-white transition-colors">Pricing</a>
+            <a href="#features" className="hover:text-white transition-colors">Features</a>
+            <a href="#explore" className="hover:text-white transition-colors">Explore</a>
+            <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
           </div>
           <div className="flex items-center gap-4">
             <Link to="/login" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Log in</Link>
@@ -301,9 +301,9 @@ export default function LandingPage() {
               </Link>
               <p className="text-sm text-gray-500 mb-6">Empowering creators to build interactive stories without limits.</p>
               <div className="flex gap-4 text-gray-400">
-                <a to="#" className="hover:text-white transition-colors"><MessageCircle className="w-5 h-5" /></a>
-                <a to="#" className="hover:text-white transition-colors"><Globe className="w-5 h-5" /></a>
-                <a to="#" className="hover:text-white transition-colors"><Mail className="w-5 h-5" /></a>
+                <a href="#" className="hover:text-white transition-colors"><MessageCircle className="w-5 h-5" /></a>
+                <a href="#" className="hover:text-white transition-colors"><Globe className="w-5 h-5" /></a>
+                <a href="#" className="hover:text-white transition-colors"><Mail className="w-5 h-5" /></a>
               </div>
             </div>
             

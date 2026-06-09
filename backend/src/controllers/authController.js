@@ -46,10 +46,27 @@ export const sendOTP = async (req, res) => {
 
     // Send email without awaiting so the user gets an instant response
     const mailOptions = {
-      from: process.env.EMAIL_USER,
+      from: `"Motionbook" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: 'Your Motionbook Verification Code',
-      text: `Your verification code is: ${otp}. It will expire in 5 minutes.`,
+      html: `
+        <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; border: 1px solid #eaeaea; border-radius: 12px; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+          <div style="text-align: center; padding-bottom: 20px; border-bottom: 2px solid #f0f0f0;">
+            <h1 style="color: #aa3bff; margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -1px;">Motionbook</h1>
+          </div>
+          <div style="padding: 30px 0; color: #333333; line-height: 1.6;">
+            <p style="font-size: 16px; margin-bottom: 20px;">Hello there,</p>
+            <p style="font-size: 16px; margin-bottom: 30px;">Thank you for choosing Motionbook! Please use the following One-Time Password (OTP) to complete your verification process. This code is valid for the next <strong>5 minutes</strong>.</p>
+            <div style="text-align: center; margin: 40px 0;">
+              <div style="display: inline-block; padding: 15px 40px; font-size: 36px; font-weight: bold; color: #111111; background-color: #f8f9fa; border: 1px solid #e5e7eb; border-radius: 8px; letter-spacing: 8px;">${otp}</div>
+            </div>
+            <p style="font-size: 14px; color: #666666; text-align: center;">If you didn't request this code, you can safely ignore this email. Someone might have typed their email incorrectly.</p>
+          </div>
+          <div style="text-align: center; padding-top: 20px; border-top: 1px solid #f0f0f0; font-size: 12px; color: #999999;">
+            <p style="margin: 0;">&copy; ${new Date().getFullYear()} Motionbook. All rights reserved.</p>
+          </div>
+        </div>
+      `,
     };
 
     getTransporter().sendMail(mailOptions)

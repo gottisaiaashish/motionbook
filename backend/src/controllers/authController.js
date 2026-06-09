@@ -1,24 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import nodemailer from 'nodemailer';
 import { User } from '../models/User.js';
 import { OTP } from '../models/OTP.js';
-
-let transporter = null;
-const getTransporter = () => {
-  if (!transporter) {
-    transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp-relay.brevo.com',
-      port: process.env.SMTP_PORT || 587,
-      secure: false,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-  }
-  return transporter;
-};
 
 export const sendOTP = async (req, res) => {
   try {
@@ -44,12 +27,8 @@ export const sendOTP = async (req, res) => {
       { upsert: true, new: true }
     );
 
-    // Send email without awaiting so the user gets an instant response
-    const mailOptions = {
-      from: `"Motionbook" <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: 'Your Motionbook Verification Code',
-      html: `
+    // Construct HTML content
+    const htmlContent = `
         <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; border: 1px solid #eaeaea; border-radius: 12px; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
           <div style="padding: 10px 0; color: #333333; line-height: 1.6;">
             <p style="font-size: 16px; margin-bottom: 20px;">Hello there,</p>
@@ -63,13 +42,32 @@ export const sendOTP = async (req, res) => {
             <p style="margin: 0;">&copy; ${new Date().getFullYear()} Motionbook. All rights reserved.</p>
           </div>
         </div>
-      `,
-    };
+      `;
 
-    // Fire and forget email sending
-    getTransporter().sendMail(mailOptions)
-      .then(() => console.log(`OTP email sent to ${email}`))
-      .catch(emailError => console.error('Error sending email:', emailError));
+    // Fire and forget email sending using Brevo HTTP API
+    fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'api-key': process.env.BREVO_API_KEY,
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        sender: { name: 'Motionbook', email: process.env.EMAIL_USER },
+        to: [{ email: email }],
+        subject: 'Your Motionbook Verification Code',
+        htmlContent: htmlContent
+      })
+    })
+    .then(async (res) => {
+      if (!res.ok) {
+        const err = await res.json();
+        console.error('Brevo API Error:', err);
+      } else {
+        console.log(`OTP email sent to ${email} via HTTP API`);
+      }
+    })
+    .catch(emailError => console.error('Error sending email:', emailError));
       
     res.status(200).json({ message: 'OTP sent successfully' });
   } catch (error) {

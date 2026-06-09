@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Hyperspeed from './Hyperspeed';
 import { login, register, sendOTP } from '../api';
@@ -10,9 +10,20 @@ const AuthPage = () => {
   const [password, setPassword] = useState('');
   const [otp, setOtp] = useState('');
   const [otpSent, setOtpSent] = useState(false);
+  const [resendTimer, setResendTimer] = useState(0);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    let interval;
+    if (otpSent && resendTimer > 0) {
+      interval = setInterval(() => {
+        setResendTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [otpSent, resendTimer]);
 
   const handleSendOTP = async (e) => {
     e.preventDefault();
@@ -25,6 +36,7 @@ const AuthPage = () => {
     try {
       await sendOTP(email);
       setOtpSent(true);
+      setResendTimer(15);
       setError('');
     } catch (err) {
       setError(err.message || 'Failed to send OTP.');
@@ -65,6 +77,7 @@ const AuthPage = () => {
     setPassword('');
     setOtp('');
     setOtpSent(false);
+    setResendTimer(0);
   };
 
   return (
@@ -150,7 +163,21 @@ const AuthPage = () => {
                 onChange={(e) => setOtp(e.target.value)}
                 required={!isLogin && otpSent}
               />
-              <p className="text-xs text-green-400 mt-1">We sent a 6-digit code to your email.</p>
+              <div className="flex justify-between items-center mt-1">
+                <p className="text-xs text-green-400">We sent a 6-digit code to your email.</p>
+                {resendTimer > 0 ? (
+                  <p className="text-xs text-gray-400">Resend in {resendTimer}s</p>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleSendOTP}
+                    disabled={isLoading}
+                    className="text-xs text-[#aa3bff] hover:text-white transition-colors duration-300 font-semibold bg-transparent border-none p-0 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Resend OTP
+                  </button>
+                )}
+              </div>
             </div>
           )}
 

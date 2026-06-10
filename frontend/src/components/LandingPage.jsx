@@ -21,7 +21,7 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white selection:bg-indigo-500/30 overflow-hidden font-sans">
-      
+
       {/* Navbar */}
       <nav className="fixed top-0 w-full z-50 border-b border-white/5 bg-black/50 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -81,7 +81,7 @@ export default function LandingPage() {
             <span>The future of digital storytelling</span>
           </motion.div>
 
-          <motion.h1 
+          <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
@@ -93,16 +93,16 @@ export default function LandingPage() {
             </span>
           </motion.h1>
 
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
             className="max-w-2xl mx-auto text-lg md:text-xl text-gray-400 mb-10"
           >
-            A premium platform to create, explore, and share breathtaking animated books and interactive experiences. 
+            A premium platform to create, explore, and share breathtaking animated books and interactive experiences.
           </motion.p>
 
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
@@ -118,7 +118,7 @@ export default function LandingPage() {
         </div>
 
         {/* Floating UI Elements Mockup */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.5 }}
@@ -127,9 +127,9 @@ export default function LandingPage() {
           <div className="aspect-video bg-gradient-to-br from-gray-900 to-black border border-white/10 rounded-2xl shadow-2xl overflow-hidden relative">
             <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop')] bg-cover bg-center opacity-40 mix-blend-overlay"></div>
             <div className="absolute inset-0 flex items-center justify-center">
-               <button onClick={() => setShowDemo(true)} className="w-20 h-20 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20 cursor-pointer hover:bg-white/20 transition-colors">
-                 <PlayCircle className="w-10 h-10 text-white ml-1" />
-               </button>
+              <button onClick={() => setShowDemo(true)} className="w-20 h-20 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20 cursor-pointer hover:bg-white/20 transition-colors">
+                <PlayCircle className="w-10 h-10 text-white ml-1" />
+              </button>
             </div>
           </div>
         </motion.div>
@@ -161,7 +161,7 @@ export default function LandingPage() {
               { title: "Cloud Storage", desc: "Your projects are safely synced and accessible from anywhere." },
               { title: "Community", desc: "Share your work and collaborate with creators around the world." }
             ].map((feature, i) => (
-              <motion.div 
+              <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -194,7 +194,7 @@ export default function LandingPage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3].map((item) => (
-              <motion.div 
+              <motion.div
                 key={item}
                 initial={{ opacity: 0, scale: 0.95 }}
                 whileInView={{ opacity: 1, scale: 1 }}
@@ -226,7 +226,7 @@ export default function LandingPage() {
               { name: "David Chen", role: "Storyteller", quote: "The intuitive editor means I spend less time coding and more time crafting the perfect narrative." },
               { name: "Emma Wright", role: "UI Designer", quote: "A game-changer for interactive mockups. The export quality is simply unmatched." }
             ].map((review, i) => (
-              <motion.div 
+              <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -260,7 +260,7 @@ export default function LandingPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {/* Free Tier */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
@@ -279,7 +279,7 @@ export default function LandingPage() {
             </motion.div>
 
             {/* Pro Tier */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
@@ -331,7 +331,7 @@ export default function LandingPage() {
                 <a href="#" className="hover:text-white transition-colors"><Mail className="w-5 h-5" /></a>
               </div>
             </div>
-            
+
             <div>
               <h4 className="font-bold mb-4 text-gray-200">Product</h4>
               <ul className="space-y-2 text-sm text-gray-500">
@@ -361,7 +361,7 @@ export default function LandingPage() {
               </ul>
             </div>
           </div>
-          
+
           <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-600">
             <p>© {new Date().getFullYear()} Motionbook Inc. All rights reserved.</p>
             <div className="flex items-center gap-2">
@@ -375,19 +375,19 @@ export default function LandingPage() {
       {/* Demo Modal */}
       <AnimatePresence>
         {showDemo && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-sm"
           >
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               className="relative w-full max-w-4xl aspect-video bg-gray-900 rounded-2xl overflow-hidden shadow-2xl border border-white/10"
             >
-              <button 
+              <button
                 onClick={() => setShowDemo(false)}
                 className="absolute top-4 right-4 z-10 p-2 bg-black/50 hover:bg-black/80 rounded-full text-white transition-colors"
               >

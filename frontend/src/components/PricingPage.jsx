@@ -5,6 +5,7 @@ import NumberFlow from "@number-flow/react";
 import { CheckCheck, Zap } from "lucide-react";
 import { VerticalCutReveal } from "./ui/VerticalCutReveal";
 import { TimelineContent } from "./ui/TimelineContent";
+import { getPlans, createRazorpayOrder, verifyRazorpayPayment } from "../api";
 
 // ─── Pricing Switch (BLACK active pill — exactly like the screenshot) ─────────
 function PricingSwitch({ button1, button2, onSwitch, className = "", layoutId }) {
@@ -194,14 +195,78 @@ export default function PricingPage() {
   const togglePlan = (val) => { setIsPhotographer(parseInt(val) === 1); setTier(0); };
   const toggleTier  = (idx) => setTier(idx);
 
+  const [processing, setProcessing] = useState(false);
+
   const key = `${isPhotographer ? 1 : 0}-${tier}`;
   const { price, original, label, tag, features } = PRICES[key];
   const discount = Math.round((1 - price / original) * 100);
 
-  const handlePurchase = () => {
-    navigate("/upgrade", {
-      state: { selectedPlan: { name: `MotionBook ${label}`, price } },
+  const loadRazorpay = () => {
+    return new Promise((resolve) => {
+      if (window.Razorpay) return resolve(true);
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
     });
+  };
+
+  const handlePurchase = async () => {
+    setProcessing(true);
+    try {
+      const plans = await getPlans();
+      // In getPlans() response, plansRes is the array directly
+      const planName = `MotionBook ${label}`;
+      const plan = plans.find((p) => p.name === planName);
+      
+      if (!plan) {
+        alert("Plan not found. Please try again.");
+        setProcessing(false);
+        return;
+      }
+
+      const res = await loadRazorpay();
+      if (!res) { 
+        alert("Razorpay SDK failed to load. Are you online?"); 
+        setProcessing(false); 
+        return; 
+      }
+
+      const orderRes = await createRazorpayOrder(plan._id);
+      const { order, key: rzpKey } = orderRes.data;
+      
+      const options = {
+        key: rzpKey, 
+        amount: order.amount, 
+        currency: order.currency,
+        name: "MotionBook", 
+        description: `Upgrade to ${plan.name}`,
+        order_id: order.id,
+        handler: async function (response) {
+          try {
+            await verifyRazorpayPayment({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            });
+            navigate("/profile?upgrade=success");
+          } catch (err) { 
+            alert("Payment verification failed."); 
+          }
+        },
+        prefill: { name: "User", email: "user@example.com" },
+        theme: { color: "#2563eb" },
+      };
+      
+      const rzp = new window.Razorpay(options);
+      rzp.on("payment.failed", function (response) { alert(response.error.description); });
+      rzp.open();
+    } catch (err) {
+      alert(err.message || "Something went wrong.");
+    } finally {
+      setProcessing(false);
+    }
   };
 
   return (

@@ -52,10 +52,10 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
-            className="text-6xl md:text-8xl font-extrabold tracking-tighter mb-6 leading-[1.05] text-gray-900"
+            className="text-6xl md:text-8xl font-extrabold tracking-tighter mb-6 leading-[1.05] text-gray-900 font-['Playfair_Display']"
           >
             Scan a Photo. <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-500">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-500 italic font-['Playfair_Display']">
               Relive the Moment.
             </span>
           </motion.h1>
@@ -79,42 +79,7 @@ export default function LandingPage() {
               Get Started
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
-            <button className="flex items-center gap-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-900 px-8 py-4 rounded-full font-semibold transition-all shadow-sm">
-              <PlayCircle className="w-5 h-5 text-blue-500" /> Watch Demo
-            </button>
           </motion.div>
-        </motion.div>
-
-        {/* 3D AR Scanner Mockup */}
-        <motion.div
-          initial={{ opacity: 0, rotateX: 20, y: 100 }}
-          animate={{ opacity: 1, rotateX: 0, y: 0 }}
-          transition={{ duration: 1.2, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="relative w-[90%] md:w-[70%] max-w-5xl aspect-[16/9] perspective-[1000px] z-20 mt-8"
-        >
-          <div className="w-full h-full relative transform-gpu shadow-2xl rounded-t-3xl overflow-hidden border border-gray-200 bg-white">
-            <img 
-              src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=2564&auto=format&fit=crop" 
-              alt="Background" 
-              className="absolute inset-0 w-full h-full object-cover opacity-50 blur-[2px]" 
-            />
-            <motion.div 
-              animate={{ y: ["0%", "100%", "0%"] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-              className="absolute left-0 right-0 h-32 bg-gradient-to-b from-transparent via-blue-500/20 to-transparent border-b border-blue-500/50"
-            />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-64 h-64 border border-blue-500/30 relative">
-                <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-blue-500"></div>
-                <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-blue-500"></div>
-                <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-blue-500"></div>
-                <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-blue-500"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <PlayCircle className="w-16 h-16 text-blue-500 opacity-80" />
-                </div>
-              </div>
-            </div>
-          </div>
         </motion.div>
       </section>
 
@@ -170,25 +135,44 @@ export default function LandingPage() {
               initial={{ rotateY: -10, rotateX: 5 }}
               whileHover={{ rotateY: 0, rotateX: 0 }}
               transition={{ duration: 0.5 }}
-              className="absolute inset-0 bg-gray-900 border-4 border-gray-800 rounded-[3rem] overflow-hidden shadow-2xl flex items-center justify-center transform-gpu perspective-[1000px]"
+              className="absolute inset-0 bg-white border-[8px] border-gray-100 rounded-[3rem] overflow-hidden shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] flex items-center justify-center transform-gpu perspective-[1000px]"
             >
-              <div className="absolute top-4 left-1/2 -translate-x-1/2 w-32 h-6 bg-black rounded-full z-20"></div>
-              <div className="w-full h-full relative">
+              {/* Phone Notch */}
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 w-32 h-7 bg-gray-100 rounded-full z-20 shadow-inner flex items-center justify-center gap-2">
+                 <div className="w-2 h-2 rounded-full bg-gray-300"></div>
+                 <div className="w-12 h-1 rounded-full bg-gray-200"></div>
+              </div>
+              
+              <div className="w-full h-full relative overflow-hidden bg-gray-50 rounded-[2.5rem]">
                 <img 
                   src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=2564&auto=format&fit=crop" 
                   alt="Wedding Photo" 
-                  className="absolute inset-0 w-full h-full object-cover"
+                  className="absolute inset-0 w-full h-full object-cover scale-105"
                 />
-                <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center">
-                  <motion.div 
-                    animate={{ scale: [0.95, 1.05, 0.95] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                    className="w-[80%] h-[60%] border-2 border-blue-500 shadow-[0_0_20px_#3b82f6] rounded-xl overflow-hidden relative bg-black/20"
-                  >
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <PlayCircle className="w-12 h-12 text-white/50" />
-                    </div>
-                  </motion.div>
+                
+                {/* Scanner Line */}
+                <motion.div 
+                  animate={{ y: ['-100%', '1000%'] }}
+                  transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
+                  className="absolute left-0 right-0 h-1 bg-blue-500 shadow-[0_0_20px_5px_rgba(59,130,246,0.7)] z-10"
+                ></motion.div>
+
+                {/* UI Overlay */}
+                <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10 w-[85%]">
+                   <motion.div
+                      animate={{ y: [0, -5, 0] }}
+                      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                      className="bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-gray-100 flex items-center gap-4"
+                   >
+                      <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
+                        <div className="w-4 h-4 rounded-full bg-blue-500 animate-ping absolute"></div>
+                        <div className="w-4 h-4 rounded-full bg-blue-500 relative"></div>
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-gray-900">Recognizing Print...</p>
+                        <p className="text-xs text-gray-500">Perfect alignment found</p>
+                      </div>
+                   </motion.div>
                 </div>
               </div>
             </motion.div>

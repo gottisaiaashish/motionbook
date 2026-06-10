@@ -133,14 +133,14 @@ export default function UpgradePage() {
                   transition={{ delay: i * 0.1 }}
                   className={`relative rounded-3xl p-10 flex flex-col overflow-hidden ${
                     plan.name === 'Premium' 
-                      ? 'bg-white border-2 border-blue-500 shadow-lg' 
+                      ? 'bg-white border-2 border-black shadow-lg' 
                       : 'bg-white border border-gray-200 shadow-sm'
                   }`}
                 >
                   {plan.name === 'Premium' && (
                     <>
-                      <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-blue-500 to-blue-600" />
-                      <div className="absolute top-8 right-8 bg-blue-50 border border-blue-200 text-blue-600 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                      <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-gray-700 to-black" />
+                      <div className="absolute top-8 right-8 bg-gray-100 border border-gray-300 text-black px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
                         <Zap className="w-3 h-3" /> Recommended
                       </div>
                     </>
@@ -162,7 +162,7 @@ export default function UpgradePage() {
                     <button 
                       onClick={() => handleUpgrade(plan._id)}
                       disabled={processing}
-                      className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-full transition-colors disabled:opacity-50 flex items-center justify-center gap-2 mb-10 shadow-md"
+                      className="w-full py-4 bg-gray-900 hover:bg-black text-white font-bold rounded-full transition-colors disabled:opacity-50 flex items-center justify-center gap-2 mb-10 shadow-md"
                     >
                       {processing ? <><Loader2 className="w-5 h-5 animate-spin" /> Processing...</> : "Upgrade Now"}
                     </button>
@@ -176,13 +176,13 @@ export default function UpgradePage() {
                   )}
 
                   <div className="flex flex-col gap-4 flex-1">
-                    <p className={`text-sm font-bold uppercase tracking-wider mb-2 ${plan.name === 'Premium' ? 'text-blue-500' : 'text-gray-400'}`}>
+                    <p className={`text-sm font-bold uppercase tracking-wider mb-2 ${plan.name === 'Premium' ? 'text-black' : 'text-gray-400'}`}>
                       {plan.name === 'Premium' ? "Everything in Free, plus" : "What's included"}
                     </p>
                     
                     {plan.features.map((feature, i) => (
                       <div key={i} className="flex items-start gap-3">
-                        <Check className={`w-5 h-5 shrink-0 ${plan.name === 'Premium' ? 'text-blue-500' : 'text-gray-400'}`} />
+                        <Check className={`w-5 h-5 shrink-0 ${plan.name === 'Premium' ? 'text-black' : 'text-gray-400'}`} />
                         <span className="text-gray-700 font-medium">{feature}</span>
                       </div>
                     ))}

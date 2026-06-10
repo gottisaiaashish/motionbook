@@ -65,7 +65,7 @@ export default function Dashboard() {
       fetchData();
       setTimeout(() => { setShowUploadModal(false); setSuccess(false); }, 1500);
     } catch (err) {
-      setError(err.response?.data?.message || "Upload failed.");
+      setError(err.message || "Upload failed.");
     } finally {
       setUploading(false);
     }
@@ -97,7 +97,7 @@ export default function Dashboard() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight mb-1 text-gray-900">Welcome back, {user.name.split(' ')[0]}</h1>
+            <h1 className="text-3xl font-bold tracking-tight mb-1 text-gray-900">Welcome back, {user?.name ? user.name.split(' ')[0] : 'User'}</h1>
             <p className="text-gray-500 text-sm">Manage your interactive albums and monitor your metrics.</p>
           </div>
           <div className="flex items-center gap-3">

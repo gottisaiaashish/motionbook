@@ -7,6 +7,9 @@ import {
 } from "lucide-react";
 import { logout, getMyMotionbooks, uploadMotionbook, deleteMotionbook, getMySubscription } from "../api";
 import { useState, useEffect, useRef, useCallback } from "react";
+import StorageBar from "./ui/StorageBar";
+import PlanBadge from "./ui/PlanBadge";
+import UpgradeBanner from "./ui/UpgradeBanner";
 
 // ─── Upload Modal ─────────────────────────────────────────────────────────────
 function UploadModal({ onClose, onSuccess }) {
@@ -375,25 +378,16 @@ export default function Dashboard() {
                 <Link to="/upgrade" className="text-xs text-indigo-400 hover:text-indigo-300">Upgrade</Link>
               </div>
               <div className="p-3 bg-white/[0.02] border border-white/5 rounded-xl">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)]" />
-                  <span className="text-sm font-semibold text-white">{subscription.planId?.name || 'Demo Plan'}</span>
+                <div className="mb-4">
+                  <PlanBadge planType={subscription.planId?.type || 'demo'} planName={subscription.planId?.name || 'Demo Plan'} />
                 </div>
                 
                 {/* Storage Bar */}
-                <div className="space-y-1.5">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-gray-400">Storage</span>
-                    <span className="text-gray-300">
-                      {((subscription.storageUsedBytes || 0) / (1024 * 1024 * 1024)).toFixed(1)} / {((subscription.planId?.storageLimitBytes || 5 * 1024 * 1024 * 1024) / (1024 * 1024 * 1024)).toFixed(0)} GB
-                    </span>
-                  </div>
-                  <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"
-                      style={{ width: `${Math.min(((subscription.storageUsedBytes || 0) / (subscription.planId?.storageLimitBytes || 5 * 1024 * 1024 * 1024)) * 100, 100)}%` }}
-                    />
-                  </div>
+                <div className="mb-3">
+                  <StorageBar 
+                    usedBytes={subscription.storageUsedBytes || 0} 
+                    totalBytes={subscription.planId?.maxStorageBytes || 5 * 1024 * 1024 * 1024} 
+                  />
                 </div>
 
                 {/* Photos Limit */}
@@ -439,24 +433,11 @@ export default function Dashboard() {
         <div className="max-w-6xl mx-auto">
 
           {/* Upgrade Banner */}
-          {subscription && subscription.planId?.isDemo && (
-            <div className="mb-8 p-4 rounded-2xl bg-gradient-to-r from-indigo-900/40 to-purple-900/40 border border-indigo-500/30 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center shrink-0">
-                  <Zap className="w-5 h-5 text-indigo-400" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-white">You are on the Free Demo Plan</h3>
-                  <p className="text-xs text-indigo-200 mt-0.5">Upgrade to a premium plan to unlock more photos, storage, and permanent AR access.</p>
-                </div>
-              </div>
-              <Link
-                to="/upgrade"
-                className="shrink-0 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-indigo-500/20"
-              >
-                Upgrade Now
-              </Link>
-            </div>
+          {subscription && subscription.planId?.type === 'demo' && (
+            <UpgradeBanner reason="demo_expiring_soon" />
+          )}
+          {subscription && subscription.storageUsedBytes >= (subscription.planId?.maxStorageBytes || 5 * 1024 * 1024 * 1024) && (
+            <UpgradeBanner reason="storage_full" />
           )}
 
           {/* Header */}

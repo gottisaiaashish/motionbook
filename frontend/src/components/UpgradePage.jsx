@@ -1,22 +1,20 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { getPlans, requestUpgrade, submitPaymentReference, getMySubscription } from "../api";
+import { getPlans, createRazorpayOrder, verifyRazorpayPayment, getMySubscription } from "../api";
 import {
-  PlayCircle, ChevronLeft, Check, Copy, X,
-  Zap, Clock, CreditCard, CheckCircle, AlertCircle
+  PlayCircle, ChevronLeft, Check,
+  Zap, CreditCard, CheckCircle, AlertCircle
 } from "lucide-react";
 
-const formatGB = (bytes) => {
-  if (!bytes) return "0 GB";
-  if (bytes >= 1024 ** 4) return `${(bytes / 1024 ** 4).toFixed(0)} TB`;
-  if (bytes >= 1024 ** 3) return `${(bytes / 1024 ** 3).toFixed(0)} GB`;
-  return `${(bytes / 1024 ** 2).toFixed(0)} MB`;
-};
-
-const PLAN_FEATURES_EXTRA = {
-  photographer: ["Photographer Dashboard", "Client Albums"],
-  user: [],
+const loadRazorpayScript = () => {
+  return new Promise((resolve) => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
 };
 
 export default function UpgradePage() {
@@ -26,13 +24,12 @@ export default function UpgradePage() {
   const [currentSub, setCurrentSub] = useState(null);
   const [activeTab, setActiveTab] = useState("user");
   const [selected, setSelected] = useState(location.state?.selectedPlan || null);
-  const [step, setStep] = useState("plans"); // plans | payment | confirm
-  const [orderData, setOrderData] = useState(null);
-  const [utr, setUtr] = useState("");
+  const [step, setStep] = useState("plans"); // plans | payment
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
-  const [copied, setCopied] = useState("");
+
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
 
   useEffect(() => {
     getPlans().then((all) => setPlans(all.filter((p) => p.type === "user" || p.type === "photographer")));
@@ -55,39 +52,67 @@ export default function UpgradePage() {
     setError("");
   };
 
-  const handleCreateOrder = async () => {
+  const handlePayment = async () => {
     if (!selected) return;
     setLoading(true);
     setError("");
+    
     try {
-      const data = await requestUpgrade(selected._id);
-      setOrderData(data);
-      setStep("confirm");
+      const res = await loadRazorpayScript();
+      if (!res) {
+        throw new Error("Razorpay SDK failed to load. Are you online?");
+      }
+
+      // Create order on backend
+      const orderData = await createRazorpayOrder(selected._id);
+
+      if (!orderData.keyId) {
+         throw new Error("Razorpay keys are not configured on the server.");
+      }
+
+      const options = {
+        key: orderData.keyId,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: "Motionbook",
+        description: orderData.plan?.description,
+        order_id: orderData.razorpayOrderId,
+        handler: async function (response) {
+          try {
+            setLoading(true);
+            await verifyRazorpayPayment({
+              orderId: orderData.orderId,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature,
+            });
+            setDone(true);
+          } catch (err) {
+            setError(err.message || "Payment verification failed");
+          } finally {
+            setLoading(false);
+          }
+        },
+        prefill: {
+          name: user.name || "",
+          email: user.email || "",
+        },
+        theme: {
+          color: "#f97316", // Orange-500
+        },
+      };
+
+      const paymentObject = new window.Razorpay(options);
+      paymentObject.on('payment.failed', function (response) {
+        setError(response.error.description || "Payment failed");
+      });
+      paymentObject.open();
+
     } catch (err) {
       setError(err.message);
     } finally {
-      setLoading(false);
+      setLoading(false); // Only unset loading if it failed to open, otherwise handler unsets it
     }
-  };
-
-  const handleSubmitUTR = async () => {
-    if (!utr.trim()) { setError("Please enter your payment reference / UTR number"); return; }
-    setLoading(true);
-    setError("");
-    try {
-      await submitPaymentReference(orderData.orderId, utr);
-      setDone(true);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const copyText = (text, key) => {
-    navigator.clipboard.writeText(text);
-    setCopied(key);
-    setTimeout(() => setCopied(""), 2000);
   };
 
   return (
@@ -121,7 +146,7 @@ export default function UpgradePage() {
 
         <AnimatePresence mode="wait">
           {/* ── Step 1: Plan Selection ── */}
-          {step === "plans" && (
+          {step === "plans" && !done && (
             <motion.div key="plans" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <div className="text-center mb-8">
                 <h1 className="text-3xl font-black text-white mb-2">Choose Your Plan</h1>
@@ -165,7 +190,7 @@ export default function UpgradePage() {
           )}
 
           {/* ── Step 2: Confirm Purchase ── */}
-          {step === "payment" && selected && (
+          {step === "payment" && selected && !done && (
             <motion.div key="payment" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}
               className="max-w-md mx-auto">
               <div className="p-6 rounded-2xl mb-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
@@ -181,64 +206,18 @@ export default function UpgradePage() {
                 </ul>
                 <div className="p-3 rounded-xl text-xs text-gray-400 flex items-center gap-2" style={{ background: "rgba(249,115,22,0.06)", border: "1px solid rgba(249,115,22,0.15)" }}>
                   <Zap className="w-4 h-4 text-orange-400" />
-                  Activation within 24 hours after payment verification
+                  Instant Activation via Razorpay
                 </div>
               </div>
-              {error && <div className="text-red-400 text-sm mb-3 p-3 rounded-xl bg-red-500/10">{error}</div>}
-              <button onClick={handleCreateOrder} disabled={loading}
-                className="w-full py-3.5 bg-orange-500 hover:bg-orange-400 text-white font-bold rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
-                {loading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><CreditCard className="w-5 h-5" />Proceed to Payment</>}
+              
+              {error && <div className="text-red-400 text-sm mb-3 p-3 rounded-xl bg-red-500/10 border border-red-500/20">{error}</div>}
+              
+              <button onClick={handlePayment} disabled={loading}
+                className="w-full py-3.5 bg-orange-500 hover:bg-orange-400 text-white font-bold rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40">
+                {loading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><CreditCard className="w-5 h-5" />Pay with Razorpay</>}
               </button>
               <button onClick={() => setStep("plans")} className="mt-3 w-full py-2.5 text-gray-400 hover:text-white text-sm transition-colors">
                 ← Back to Plans
-              </button>
-            </motion.div>
-          )}
-
-          {/* ── Step 3: Payment Instructions ── */}
-          {step === "confirm" && orderData && !done && (
-            <motion.div key="confirm" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}
-              className="max-w-md mx-auto">
-              <div className="text-center mb-6">
-                <div className="w-14 h-14 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center mx-auto mb-3">
-                  <CreditCard className="w-7 h-7 text-orange-400" />
-                </div>
-                <h2 className="text-white font-bold text-xl">Transfer ₹{orderData.plan?.price?.toLocaleString("en-IN")}</h2>
-                <p className="text-gray-400 text-sm mt-1">to complete your {orderData.plan?.name} purchase</p>
-              </div>
-
-              <div className="space-y-3 mb-6">
-                {[
-                  { label: "UPI ID", value: orderData.paymentInstructions?.upiId, key: "upi" },
-                  { label: "Bank Account", value: orderData.paymentInstructions?.bankAccount, key: "acc" },
-                  { label: "IFSC Code", value: orderData.paymentInstructions?.bankIFSC, key: "ifsc" },
-                  { label: "Amount", value: `₹${orderData.paymentInstructions?.amount?.toLocaleString("en-IN")}`, key: "amt" },
-                  { label: "Note / Description", value: orderData.paymentInstructions?.note, key: "note" },
-                ].map((item) => (
-                  <div key={item.key} className="flex items-center justify-between p-3 rounded-xl" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                    <div>
-                      <div className="text-gray-500 text-xs">{item.label}</div>
-                      <div className="text-white font-mono text-sm mt-0.5">{item.value}</div>
-                    </div>
-                    <button onClick={() => copyText(item.value, item.key)}
-                      className="p-2 rounded-lg hover:bg-white/10 transition-colors text-gray-400 hover:text-white">
-                      {copied === item.key ? <CheckCircle className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
-                    </button>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mb-4">
-                <label className="text-gray-400 text-xs font-medium mb-2 block">Enter UTR / Transaction Reference *</label>
-                <input value={utr} onChange={(e) => setUtr(e.target.value)}
-                  placeholder="e.g. 123456789012 or UPI Ref ID"
-                  className="w-full px-4 py-3 rounded-xl text-white text-sm outline-none focus:border-orange-500/60 transition-colors"
-                  style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }} />
-              </div>
-              {error && <div className="text-red-400 text-sm mb-3 p-3 rounded-xl bg-red-500/10">{error}</div>}
-              <button onClick={handleSubmitUTR} disabled={loading}
-                className="w-full py-3.5 bg-orange-500 hover:bg-orange-400 text-white font-bold rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
-                {loading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : "Submit Payment Reference"}
               </button>
             </motion.div>
           )}
@@ -250,8 +229,8 @@ export default function UpgradePage() {
               <div className="w-20 h-20 rounded-3xl bg-green-500/10 border border-green-500/20 flex items-center justify-center mx-auto mb-6">
                 <CheckCircle className="w-10 h-10 text-green-400" />
               </div>
-              <h2 className="text-white font-black text-2xl mb-3">Payment Submitted! 🎉</h2>
-              <p className="text-gray-400 mb-8">Your {selected?.name} will be activated within <strong className="text-white">24 hours</strong> after our team verifies your payment.</p>
+              <h2 className="text-white font-black text-2xl mb-3">Payment Successful! 🎉</h2>
+              <p className="text-gray-400 mb-8">Your {selected?.name} has been instantly activated. You can now continue using Motionbook.</p>
               <Link to="/dashboard"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-400 text-white font-bold rounded-xl transition-colors">
                 Go to Dashboard

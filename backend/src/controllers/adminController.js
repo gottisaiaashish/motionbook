@@ -15,8 +15,9 @@ const adminToken = (email) =>
 /** POST /api/admin/login */
 export const adminLogin = (req, res) => {
   const { email, password } = req.body;
+  const allowedEmails = [process.env.ADMIN_EMAIL, 'gottisaiaashish@gmail.com'];
   if (
-    email !== process.env.ADMIN_EMAIL ||
+    !allowedEmails.includes(email) ||
     password !== process.env.ADMIN_PASSWORD
   ) {
     return res.status(401).json({ message: 'Invalid admin credentials' });

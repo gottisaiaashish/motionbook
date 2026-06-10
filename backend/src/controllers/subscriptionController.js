@@ -1,6 +1,8 @@
 import { Subscription } from '../models/Subscription.js';
 import { Plan } from '../models/Plan.js';
 import { Order } from '../models/Order.js';
+import crypto from 'crypto';
+import { razorpayInstance } from '../utils/razorpay.js';
 
 /**
  * GET /api/subscription/my  (protected)
@@ -181,4 +183,104 @@ export const activateSubscription = async (userId, planId, orderId = null, statu
   });
 
   return subscription;
+};
+
+/**
+ * POST /api/subscription/create-razorpay-order
+ */
+export const createRazorpayOrder = async (req, res) => {
+  try {
+    const { planId } = req.body;
+    if (!planId) return res.status(400).json({ message: 'Plan ID is required' });
+
+    const plan = await Plan.findById(planId);
+    if (!plan || !plan.isActive) {
+      return res.status(404).json({ message: 'Plan not found or inactive' });
+    }
+    if (plan.type === 'demo' || plan.type === 'referral') {
+      return res.status(400).json({ message: 'Cannot purchase this plan type' });
+    }
+
+    if (!razorpayInstance) {
+      return res.status(500).json({ message: 'Razorpay is not configured' });
+    }
+
+    // Razorpay amount is in paise (INR * 100)
+    const amount = plan.price * 100;
+    const options = {
+      amount,
+      currency: 'INR',
+      receipt: `receipt_${Date.now()}_${req.user._id}`,
+    };
+
+    const razorpayOrder = await razorpayInstance.orders.create(options);
+
+    // Save order in our DB with Razorpay Order ID
+    const order = await Order.create({
+      userId: req.user._id,
+      planId: plan._id,
+      amount: plan.price,
+      status: 'pending_payment',
+      paymentReference: razorpayOrder.id, // Store razorpay order ID here
+    });
+
+    res.status(201).json({
+      orderId: order._id,
+      razorpayOrderId: razorpayOrder.id,
+      amount,
+      currency: 'INR',
+      keyId: process.env.RAZORPAY_KEY_ID,
+      plan: { name: plan.name, description: `Upgrade to ${plan.name}` }
+    });
+  } catch (error) {
+    console.error('createRazorpayOrder error:', error);
+    res.status(500).json({ message: 'Failed to create Razorpay order' });
+  }
+};
+
+/**
+ * POST /api/subscription/verify-razorpay-payment
+ */
+export const verifyRazorpayPayment = async (req, res) => {
+  try {
+    const { orderId, razorpay_payment_id, razorpay_order_id, razorpay_signature } = req.body;
+
+    if (!razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
+      return res.status(400).json({ message: 'Missing Razorpay payment details' });
+    }
+
+    // Verify signature
+    const secret = process.env.RAZORPAY_KEY_SECRET;
+    const generated_signature = crypto
+      .createHmac('sha256', secret)
+      .update(razorpay_order_id + '|' + razorpay_payment_id)
+      .digest('hex');
+
+    if (generated_signature !== razorpay_signature) {
+      return res.status(400).json({ message: 'Payment verification failed: Invalid signature' });
+    }
+
+    // Find the order
+    const order = await Order.findOne({ _id: orderId, userId: req.user._id });
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    if (order.status !== 'pending_payment') {
+      return res.status(400).json({ message: `Order is already ${order.status}` });
+    }
+
+    // Update order status
+    order.status = 'approved';
+    order.processedAt = new Date();
+    await order.save();
+
+    // Activate subscription
+    const subscription = await activateSubscription(req.user._id, order.planId, order._id, 'active');
+
+    res.json({ message: 'Payment verified and plan activated', subscription });
+  } catch (error) {
+    console.error('verifyRazorpayPayment error:', error);
+    res.status(500).json({ message: 'Payment verification failed' });
+  }
 };

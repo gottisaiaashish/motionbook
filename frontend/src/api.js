@@ -186,8 +186,8 @@ export const getMySubscription = async () => {
   return r.json();
 };
 
-export const requestUpgrade = async (planId) => {
-  const r = await fetch(`${API_SUB_URL}/request-upgrade`, {
+export const createRazorpayOrder = async (planId) => {
+  const r = await fetch(`${API_SUB_URL}/create-razorpay-order`, {
     method: 'POST',
     headers: { ...getAuthHeader(), 'Content-Type': 'application/json' },
     body: JSON.stringify({ planId }),
@@ -196,11 +196,11 @@ export const requestUpgrade = async (planId) => {
   return r.json();
 };
 
-export const submitPaymentReference = async (orderId, paymentReference) => {
-  const r = await fetch(`${API_SUB_URL}/submit-payment`, {
+export const verifyRazorpayPayment = async (paymentData) => {
+  const r = await fetch(`${API_SUB_URL}/verify-razorpay-payment`, {
     method: 'POST',
     headers: { ...getAuthHeader(), 'Content-Type': 'application/json' },
-    body: JSON.stringify({ orderId, paymentReference }),
+    body: JSON.stringify(paymentData),
   });
   if (!r.ok) { const e = await r.json(); throw new Error(e.message || 'Failed'); }
   return r.json();

@@ -118,7 +118,7 @@ export const uploadMotionbook = async (formData) => {
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.message || 'Upload failed');
+    throw new Error(error.error || error.message || 'Upload failed');
   }
   return response.json();
 };

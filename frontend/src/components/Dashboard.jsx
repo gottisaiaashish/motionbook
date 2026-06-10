@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-import { PlayCircle, LogOut, Upload, X, ImageIcon, Video, Check, AlertCircle, Loader2, Film, TrendingUp, HardDrive, Eye, DollarSign, Camera } from "lucide-react";
+import { PlayCircle, LogOut, Upload, X, ImageIcon, Video, Check, AlertCircle, Loader2, Film, HardDrive, Camera } from "lucide-react";
 import { getMyMotionbooks, getMySubscription } from "../api";
 
 const MAX_IMAGE_MB = 10;
@@ -181,48 +181,24 @@ export default function Dashboard() {
         </div>
 
         {/* Analytics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {/* Revenue */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white border border-gray-200 rounded-2xl p-6 relative overflow-hidden group hover:shadow-lg transition-shadow">
-            <div className="flex items-center gap-3 text-gray-500 mb-4">
-              <DollarSign className="w-5 h-5 text-green-500" />
-              <span className="font-medium text-sm">Monthly Revenue</span>
-            </div>
-            <div className="text-4xl font-bold tracking-tight text-gray-900 mb-2">$4,250</div>
-            <div className="flex items-center gap-1 text-sm text-green-500 font-medium">
-              <TrendingUp className="w-4 h-4" /> +12.5% this month
-            </div>
-          </motion.div>
-
-          {/* Views */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-white border border-gray-200 rounded-2xl p-6 relative overflow-hidden group hover:shadow-lg transition-shadow">
-            <div className="flex items-center gap-3 text-gray-500 mb-4">
-              <Eye className="w-5 h-5 text-blue-500" />
-              <span className="font-medium text-sm">Album Scans</span>
-            </div>
-            <div className="text-4xl font-bold tracking-tight text-gray-900 mb-2">18.4k</div>
-            <div className="flex items-center gap-1 text-sm text-blue-500 font-medium">
-              <TrendingUp className="w-4 h-4" /> +8.2% this month
-            </div>
-          </motion.div>
-
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {/* Albums */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white border border-gray-200 rounded-2xl p-6 relative overflow-hidden group hover:shadow-lg transition-shadow">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white border border-gray-200 rounded-2xl p-6 relative overflow-hidden group hover:shadow-lg transition-shadow">
             <div className="flex items-center gap-3 text-gray-500 mb-4">
               <Upload className="w-5 h-5 text-purple-500" />
               <span className="font-medium text-sm">Active Albums</span>
             </div>
             <div className="text-4xl font-bold tracking-tight text-gray-900 mb-2">{usedStorage}</div>
-            <div className="text-sm text-gray-400 font-medium">Across all clients</div>
+            <div className="text-sm text-gray-400 font-medium">Total albums created</div>
           </motion.div>
 
           {/* Storage */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="bg-white border border-gray-200 rounded-2xl p-6 relative overflow-hidden group hover:shadow-lg transition-shadow flex flex-col justify-between">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-white border border-gray-200 rounded-2xl p-6 relative overflow-hidden group hover:shadow-lg transition-shadow flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between text-gray-500 mb-4">
                 <div className="flex items-center gap-3">
                   <HardDrive className="w-5 h-5 text-blue-500" />
-                  <span className="font-medium text-sm">Storage Limit</span>
+                  <span className="font-medium text-sm">Storage Used</span>
                 </div>
                 {!isPremium && <Link to="/pricing" className="text-xs text-blue-500 hover:underline font-medium">Upgrade</Link>}
               </div>

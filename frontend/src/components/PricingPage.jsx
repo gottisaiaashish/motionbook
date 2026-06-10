@@ -215,10 +215,10 @@ export default function PricingPage() {
   const handlePurchase = async () => {
     setProcessing(true);
     try {
-      const plans = await getPlans();
-      // In getPlans() response, plansRes is the array directly
+      const plansRes = await getPlans();
+      const plansArray = Array.isArray(plansRes) ? plansRes : (plansRes.data || []);
       const planName = `MotionBook ${label}`;
-      const plan = plans.find((p) => p.name === planName);
+      const plan = plansArray.find((p) => p.name === planName);
       
       if (!plan) {
         alert("Plan not found. Please try again.");

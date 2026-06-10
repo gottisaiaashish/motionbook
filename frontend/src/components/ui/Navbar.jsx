@@ -205,8 +205,15 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Right — Auth buttons */}
-          <div className="flex items-center gap-2">
+          {/* Right — Scan Button + Auth buttons */}
+          <div className="flex items-center gap-3">
+            <Link 
+              to="/scan" 
+              className="hidden sm:flex items-center gap-2 text-sm font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-full transition-colors border border-blue-100"
+            >
+              <Camera className="w-4 h-4" /> Scan Photo
+            </Link>
+            
             {isLoggedIn ? (
               <Link
                 to="/profile"
@@ -215,14 +222,14 @@ export default function Navbar() {
                 <User className="w-4 h-4 text-white" />
               </Link>
             ) : (
-              <>
-                <Link to="/login" className="text-sm font-medium text-gray-500 hover:text-gray-900 px-3 py-2 transition-colors">
+              <div className="flex items-center gap-2">
+                <Link to="/login" className="hidden sm:block text-sm font-medium text-gray-500 hover:text-gray-900 px-3 py-2 transition-colors">
                   Sign In
                 </Link>
                 <Link to="/signup" className="text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 px-4 py-2 rounded-full transition-all shadow-sm">
                   Get Started
                 </Link>
-              </>
+              </div>
             )}
           </div>
         </div>
@@ -279,8 +286,16 @@ export default function Navbar() {
                 </div>
               ))}
 
-              {/* Mobile auth */}
+              {/* Mobile Scan & Auth */}
               <div className="h-px bg-gray-200 mx-1 my-3" />
+              
+              <Link
+                to="/scan"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center justify-center gap-2 w-full bg-blue-50 text-blue-600 border border-blue-100 py-3 rounded-xl text-sm font-bold mb-2"
+              >
+                <Camera className="w-4 h-4" /> Scan Photo
+              </Link>
               {isLoggedIn ? (
                 <Link
                   to="/profile"

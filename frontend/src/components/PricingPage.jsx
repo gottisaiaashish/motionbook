@@ -1,6 +1,6 @@
 import { useState, useId, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import NumberFlow from "@number-flow/react";
 import { CheckCheck, Zap } from "lucide-react";
 import { VerticalCutReveal } from "./ui/VerticalCutReveal";
@@ -85,23 +85,88 @@ function TierSwitch({ options, onSwitch, layoutId }) {
 
 // ─── Price Map ────────────────────────────────────────────────────────────────
 const PRICES = {
-  "0-0": { price: 999,   original: 1449,  label: "Spark",        tag: "1 Album · 100 Photos · Lifetime" },
-  "0-1": { price: 2499,  original: 3624,  label: "Memories",     tag: "2 Albums · 300 Photos · Lifetime" },
-  "0-2": { price: 4999,  original: 7249,  label: "Forever",      tag: "1 Wedding Album · 500 Photos · Family Sharing" },
-  "1-0": { price: 7999,  original: 11599, label: "Creator",      tag: "5 Client Albums · 50 GB Storage" },
-  "1-1": { price: 24999, original: 36249, label: "Pro Studio",   tag: "20 Albums · 250 GB Storage · Analytics" },
-  "1-2": { price: 79999, original: 115999,label: "Elite Studio", tag: "100 Albums · 1 TB Storage · White-label" },
+  "0-0": {
+    price: 999, original: 1449, label: "Spark",
+    tag: "1 Album · 100 Photos · Lifetime",
+    features: [
+      "1 Album",
+      "100 Photos",
+      "5 GB Storage",
+      "AR Scan Enabled",
+      "Web AR — no app needed",
+      "Lifetime Access",
+    ],
+  },
+  "0-1": {
+    price: 2499, original: 3624, label: "Memories",
+    tag: "2 Albums · 300 Photos · Lifetime",
+    features: [
+      "2 Albums",
+      "300 Photos",
+      "15 GB Storage",
+      "AR Scan Enabled",
+      "Web AR — no app needed",
+      "HD Photo Printing Guide",
+      "Lifetime Access",
+    ],
+  },
+  "0-2": {
+    price: 4999, original: 7249, label: "Forever",
+    tag: "1 Wedding Album · 500 Photos · Family Sharing",
+    features: [
+      "1 Wedding Album",
+      "500 Photos",
+      "50 GB Storage",
+      "AR Scan Enabled",
+      "Family Sharing",
+      "HD Photo Printing Guide",
+      "Priority Email Support",
+      "Lifetime Access",
+    ],
+  },
+  "1-0": {
+    price: 7999, original: 11599, label: "Creator",
+    tag: "5 Client Albums · 50 GB Storage",
+    features: [
+      "5 Client Albums",
+      "500 Photos",
+      "50 GB Total Storage",
+      "Photographer Dashboard",
+      "AR Scan Enabled",
+      "Client Sharing Links",
+      "Lifetime Access",
+    ],
+  },
+  "1-1": {
+    price: 24999, original: 36249, label: "Pro Studio",
+    tag: "20 Albums · 250 GB Storage · Analytics",
+    features: [
+      "20 Client Albums",
+      "5,000 Photos",
+      "250 GB Total Storage",
+      "Analytics Dashboard",
+      "Photographer Dashboard",
+      "Priority Support",
+      "Custom Branding",
+      "Lifetime Access",
+    ],
+  },
+  "1-2": {
+    price: 79999, original: 115999, label: "Elite Studio",
+    tag: "100 Albums · 1 TB Storage · White-label",
+    features: [
+      "100 Client Albums",
+      "Unlimited Photos",
+      "1 TB Total Storage",
+      "Advanced Analytics",
+      "White-label Branding",
+      "Priority Support",
+      "Dedicated Account Manager",
+      "API Access",
+      "Lifetime Access",
+    ],
+  },
 };
-
-const FEATURES = [
-  "AR Scan — works right from the browser",
-  "Lifetime access, no renewals",
-  "HD photo trigger printing guide",
-  "Cloudinary CDN video streaming",
-  "Mobile-first Web AR scanner",
-  "Family sharing (Forever & above)",
-  "Priority email support",
-];
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function PricingPage() {
@@ -130,7 +195,7 @@ export default function PricingPage() {
   const toggleTier  = (idx) => setTier(idx);
 
   const key = `${isPhotographer ? 1 : 0}-${tier}`;
-  const { price, original, label, tag } = PRICES[key];
+  const { price, original, label, tag, features } = PRICES[key];
   const discount = Math.round((1 - price / original) * 100);
 
   const handlePurchase = () => {
@@ -196,35 +261,44 @@ export default function PricingPage() {
         {/* ── Two-column body ── */}
         <div className="grid sm:grid-cols-2 md:gap-12 gap-6 items-center">
 
-          {/* Left — Features */}
+          {/* Left — Features (dynamic per plan) */}
           <div>
             <TimelineContent
               as="h3"
               animationNum={2}
               timelineRef={pricingRef}
               customVariants={revealVariants}
-              className="text-3xl font-medium text-gray-900 mb-4"
+              className="text-3xl font-medium text-gray-900 mb-2"
             >
               What's inside
             </TimelineContent>
+            <p className="text-sm text-gray-500 mb-5">MotionBook {label}</p>
 
-            <div className="space-y-4">
-              {FEATURES.map((feature, index) => (
-                <TimelineContent
-                  key={index}
-                  as="div"
-                  animationNum={3 + index}
-                  timelineRef={pricingRef}
-                  customVariants={timelineVariants}
-                  className="flex items-center gap-3"
-                >
-                  <div className="w-6 h-6 bg-blue-500 shadow-md shadow-blue-500/50 rounded-full flex items-center justify-center shrink-0">
-                    <CheckCheck className="h-4 w-4 text-white" />
-                  </div>
-                  <span className="text-gray-700">{feature}</span>
-                </TimelineContent>
-              ))}
-            </div>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={key}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.25 }}
+                className="space-y-4"
+              >
+                {features.map((feature, index) => (
+                  <motion.div
+                    key={feature}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="flex items-center gap-3"
+                  >
+                    <div className="w-6 h-6 bg-blue-500 shadow-md shadow-blue-500/50 rounded-full flex items-center justify-center shrink-0">
+                      <CheckCheck className="h-4 w-4 text-white" />
+                    </div>
+                    <span className="text-gray-700">{feature}</span>
+                  </motion.div>
+                ))}
+              </motion.div>
+            </AnimatePresence>
           </div>
 
           {/* Right — Toggles + Price */}
@@ -290,8 +364,16 @@ export default function PricingPage() {
                     className="text-5xl font-semibold"
                   />
                 </span>
-                <span className="text-xl text-gray-500 line-through ml-1">
-                  ₹<NumberFlow value={original} className="text-xl font-semibold line-through" />
+                <span className="relative text-xl text-gray-400 ml-1 inline-flex items-center">
+                  <motion.span
+                    key={key}
+                    initial={{ width: 0 }}
+                    animate={{ width: "100%" }}
+                    transition={{ delay: 0.4, duration: 0.4, ease: "easeOut" }}
+                    className="absolute left-0 top-1/2 -translate-y-1/2 h-[2px] bg-gray-500 origin-left"
+                    style={{ zIndex: 1 }}
+                  />
+                  ₹<NumberFlow value={original} className="text-xl font-semibold" />
                 </span>
               </div>
 

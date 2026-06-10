@@ -45,14 +45,15 @@ export default function UpgradePage() {
       const res = await loadRazorpay();
       if (!res) { setError("Razorpay SDK failed to load."); setProcessing(false); return; }
       const orderRes = await createRazorpayOrder(planId);
-      const { order, key } = orderRes.data;
+      const { razorpayOrderId, amount, currency, keyId, orderId } = orderRes;
       const options = {
-        key, amount: order.amount, currency: order.currency,
+        key: keyId, amount, currency,
         name: "MotionBook", description: "Upgrade to Premium Plan",
-        order_id: order.id,
+        order_id: razorpayOrderId,
         handler: async function (response) {
           try {
             await verifyRazorpayPayment({
+              orderId,
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,

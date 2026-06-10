@@ -234,18 +234,19 @@ export default function PricingPage() {
       }
 
       const orderRes = await createRazorpayOrder(plan._id);
-      const { order, key: rzpKey } = orderRes.data;
+      const { razorpayOrderId, amount, currency, keyId, orderId, plan: rzpPlan } = orderRes;
       
       const options = {
-        key: rzpKey, 
-        amount: order.amount, 
-        currency: order.currency,
+        key: keyId, 
+        amount: amount, 
+        currency: currency,
         name: "MotionBook", 
-        description: `Upgrade to ${plan.name}`,
-        order_id: order.id,
+        description: rzpPlan.description,
+        order_id: razorpayOrderId,
         handler: async function (response) {
           try {
             await verifyRazorpayPayment({
+              orderId: orderId,
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,

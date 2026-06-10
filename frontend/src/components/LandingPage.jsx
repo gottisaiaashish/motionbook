@@ -22,42 +22,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white selection:bg-indigo-500/30 overflow-hidden font-sans">
 
-      {/* Navbar */}
-      <nav className="fixed top-0 w-full z-50 border-b border-white/5 bg-black/50 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-              <PlayCircle className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-xl font-bold tracking-tight">Motionbook</span>
-          </Link>
-          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-300">
-            <a href="#features" className="hover:text-white transition-colors">Features</a>
-            <a href="#explore" className="hover:text-white transition-colors">Explore</a>
-            <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
-          </div>
-          <div className="flex items-center gap-4">
-            {loggedIn ? (
-              <>
-                <span className="text-sm font-medium text-gray-300">Hey, <span className="text-white font-semibold">{firstName}</span></span>
-                <Link to="/profile" className="text-sm font-medium bg-white text-black px-4 py-2 rounded-full hover:bg-gray-200 transition-colors">
-                  Profile
-                </Link>
-                <button onClick={handleLogout} className="text-sm text-gray-400 hover:text-red-400 transition-colors flex items-center gap-1">
-                  <LogOut className="w-4 h-4" /> Sign out
-                </button>
-              </>
-            ) : (
-              <>
-                <Link to="/login" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Log in</Link>
-                <Link to="/signup" className="text-sm font-medium bg-white text-black px-4 py-2 rounded-full hover:bg-gray-200 transition-colors">
-                  Sign up
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-      </nav>
+      {/* Removed Top Navbar */}
 
       {/* Hero Section */}
       <main className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 flex flex-col items-center justify-center min-h-screen">

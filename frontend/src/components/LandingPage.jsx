@@ -39,9 +39,9 @@ export default function LandingPage() {
           <div className="flex items-center gap-4">
             {loggedIn ? (
               <>
-                <span className="text-sm font-medium text-gray-300">Hey, <span className="text-white font-semibold">{firstName}</span> 👋</span>
-                <Link to="/dashboard" className="text-sm font-medium bg-white text-black px-4 py-2 rounded-full hover:bg-gray-200 transition-colors">
-                  Dashboard
+                <span className="text-sm font-medium text-gray-300">Hey, <span className="text-white font-semibold">{firstName}</span></span>
+                <Link to="/profile" className="text-sm font-medium bg-white text-black px-4 py-2 rounded-full hover:bg-gray-200 transition-colors">
+                  Profile
                 </Link>
                 <button onClick={handleLogout} className="text-sm text-gray-400 hover:text-red-400 transition-colors flex items-center gap-1">
                   <LogOut className="w-4 h-4" /> Sign out
@@ -251,83 +251,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section id="pricing" className="py-24 bg-[#0a0a0a] relative z-10 border-t border-white/5">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold mb-4">Simple Pricing</h2>
-            <p className="text-gray-400">Start for free, upgrade when you need more power.</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {/* Spark Tier */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="p-8 rounded-3xl bg-white/5 border border-white/10 flex flex-col"
-            >
-              <h3 className="text-2xl font-bold mb-2">MotionBook Spark</h3>
-              <div className="text-4xl font-extrabold mb-6">₹999<span className="text-sm text-gray-500 font-normal"> / one-time</span></div>
-              <ul className="space-y-4 mb-8 text-gray-300 flex-1">
-                <li>1 Album</li>
-                <li>100 Photos</li>
-                <li>5 GB Storage</li>
-                <li>AR Scan Enabled</li>
-                <li>10 Years Access</li>
-              </ul>
-              <Link to="/signup" className="block text-center w-full py-4 rounded-xl bg-white/10 hover:bg-white/20 font-semibold transition-colors mt-auto">
-                Get Started
-              </Link>
-            </motion.div>
-
-            {/* Memories Tier */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              className="p-8 rounded-3xl bg-gradient-to-b from-indigo-900/50 to-black border border-indigo-500/30 relative overflow-hidden flex flex-col shadow-2xl shadow-indigo-500/10"
-            >
-              <div className="absolute top-0 right-0 bg-indigo-500 text-white text-xs font-bold px-4 py-1.5 rounded-bl-lg">POPULAR</div>
-              <h3 className="text-2xl font-bold mb-2 text-indigo-100">MotionBook Memories</h3>
-              <div className="text-4xl font-extrabold mb-6">₹2,499<span className="text-sm text-indigo-300 font-normal"> / one-time</span></div>
-              <ul className="space-y-4 mb-8 text-indigo-100/80 flex-1">
-                <li>2 Albums</li>
-                <li>300 Photos</li>
-                <li>15 GB Storage</li>
-                <li>AR Scan Enabled</li>
-                <li>10 Years Access</li>
-              </ul>
-              <Link to="/signup" className="block text-center w-full py-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 font-semibold transition-colors shadow-lg shadow-indigo-500/25 mt-auto">
-                Select Plan
-              </Link>
-            </motion.div>
-
-            {/* Forever Tier */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-              className="p-8 rounded-3xl bg-white/5 border border-white/10 flex flex-col"
-            >
-              <h3 className="text-2xl font-bold mb-2">MotionBook Forever</h3>
-              <div className="text-4xl font-extrabold mb-6">₹4,999<span className="text-sm text-gray-500 font-normal"> / one-time</span></div>
-              <ul className="space-y-4 mb-8 text-gray-300 flex-1">
-                <li>1 Wedding Album</li>
-                <li>500 Photos</li>
-                <li>50 GB Storage</li>
-                <li>Family Sharing</li>
-                <li>AR Scan Enabled</li>
-                <li>10 Years Access</li>
-              </ul>
-              <Link to="/signup" className="block text-center w-full py-4 rounded-xl bg-white/10 hover:bg-white/20 font-semibold transition-colors mt-auto">
-                Get Started
-              </Link>
-            </motion.div>
-          </div>
-        </div>
-      </section>
+      {/* Removed Pricing Section */}
 
       {/* Bottom CTA */}
       <section className="py-24 relative overflow-hidden">
@@ -365,7 +289,6 @@ export default function LandingPage() {
               <ul className="space-y-2 text-sm text-gray-500">
                 <li><Link to="#features" className="hover:text-indigo-400 transition-colors">Features</Link></li>
                 <li><Link to="#explore" className="hover:text-indigo-400 transition-colors">Explore</Link></li>
-                <li><Link to="#pricing" className="hover:text-indigo-400 transition-colors">Pricing</Link></li>
                 <li><Link to="/changelog" className="hover:text-indigo-400 transition-colors">Changelog</Link></li>
               </ul>
             </div>

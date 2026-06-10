@@ -1,17 +1,10 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  PlayCircle, LogOut, PlusCircle, LayoutDashboard,
-  Trash2, Upload, X, ImageIcon, Video, Scan,
-  Copy, Check, AlertCircle, Loader2, Film, Zap,
-} from "lucide-react";
+import { PlayCircle, LogOut, PlusCircle, Trash2, Upload, X, ImageIcon, Video, Copy, Check, AlertCircle, Loader2, Film } from "lucide-react";
 import { logout, getMyMotionbooks, uploadMotionbook, deleteMotionbook, getMySubscription } from "../api";
 import { useState, useEffect, useRef, useCallback } from "react";
 import StorageBar from "./ui/StorageBar";
-import PlanBadge from "./ui/PlanBadge";
-import UpgradeBanner from "./ui/UpgradeBanner";
 
-// ─── Upload Modal ─────────────────────────────────────────────────────────────
 function UploadModal({ onClose, onSuccess }) {
   const [title, setTitle] = useState("");
   const [imageFile, setImageFile] = useState(null);
@@ -19,7 +12,7 @@ function UploadModal({ onClose, onSuccess }) {
   const [imagePreview, setImagePreview] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
-  const [dragOver, setDragOver] = useState(null); // 'image' | 'video' | null
+  const [dragOver, setDragOver] = useState(null);
   const imageInputRef = useRef();
   const videoInputRef = useRef();
 
@@ -83,25 +76,22 @@ function UploadModal({ onClose, onSuccess }) {
         initial={{ scale: 0.95, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.95, opacity: 0, y: 20 }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="relative w-full max-w-lg bg-[#111114] border border-white/10 rounded-3xl p-6 shadow-2xl"
+        className="relative w-full max-w-lg bg-[#111111] border border-white/10 rounded-3xl p-6 shadow-2xl"
       >
-        {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-xl font-bold text-white">New Motionbook</h2>
+            <h2 className="text-xl font-bold text-[#fcf5eb]">New Motionbook</h2>
             <p className="text-sm text-gray-400 mt-0.5">Upload a photo + video pair</p>
           </div>
           <button
             onClick={onClose}
             disabled={uploading}
-            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all disabled:opacity-40"
+            className="p-2 rounded-xl hover:bg-white/10 text-gray-400 hover:text-white transition-all"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Title */}
         <div className="mb-5">
           <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">
             Title
@@ -111,12 +101,11 @@ function UploadModal({ onClose, onSuccess }) {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="e.g. Wedding Day 2024"
-            className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-indigo-500/60 focus:ring-2 focus:ring-indigo-500/20 transition-all text-sm"
+            className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-[#ea3c12] focus:ring-1 focus:ring-[#ea3c12] transition-all text-sm"
           />
         </div>
 
         <div className="grid grid-cols-2 gap-4 mb-5">
-          {/* Image Dropzone */}
           <div>
             <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">
               Trigger Photo
@@ -126,16 +115,10 @@ function UploadModal({ onClose, onSuccess }) {
               onDragLeave={() => setDragOver(null)}
               onDrop={(e) => handleDrop(e, "image")}
               onClick={() => imageInputRef.current.click()}
-              className={`relative aspect-square rounded-2xl border-2 border-dashed cursor-pointer flex flex-col items-center justify-center transition-all overflow-hidden
-                ${dragOver === "image" ? "border-indigo-500 bg-indigo-500/10" : "border-white/10 hover:border-white/20 bg-white/[0.02]"}`}
+              className={`relative aspect-square rounded-2xl border-2 border-dashed cursor-pointer flex flex-col items-center justify-center transition-all overflow-hidden ${dragOver === "image" ? "border-[#ea3c12] bg-[#ea3c12]/10" : "border-white/10 hover:border-white/20 bg-white/[0.02]"}`}
             >
               {imagePreview ? (
-                <>
-                  <img src={imagePreview} alt="preview" className="absolute inset-0 w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                    <span className="text-xs text-white font-medium">Change</span>
-                  </div>
-                </>
+                <img src={imagePreview} alt="preview" className="absolute inset-0 w-full h-full object-cover" />
               ) : (
                 <>
                   <ImageIcon className="w-8 h-8 text-gray-600 mb-2" />
@@ -146,7 +129,6 @@ function UploadModal({ onClose, onSuccess }) {
             <input ref={imageInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleImageChange(e.target.files[0])} />
           </div>
 
-          {/* Video Dropzone */}
           <div>
             <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">
               Video
@@ -156,13 +138,12 @@ function UploadModal({ onClose, onSuccess }) {
               onDragLeave={() => setDragOver(null)}
               onDrop={(e) => handleDrop(e, "video")}
               onClick={() => videoInputRef.current.click()}
-              className={`aspect-square rounded-2xl border-2 border-dashed cursor-pointer flex flex-col items-center justify-center transition-all
-                ${dragOver === "video" ? "border-purple-500 bg-purple-500/10" : videoFile ? "border-purple-500/40 bg-purple-500/5" : "border-white/10 hover:border-white/20 bg-white/[0.02]"}`}
+              className={`aspect-square rounded-2xl border-2 border-dashed cursor-pointer flex flex-col items-center justify-center transition-all ${dragOver === "video" ? "border-purple-500 bg-purple-500/10" : videoFile ? "border-[#ea3c12]/40 bg-[#ea3c12]/5" : "border-white/10 hover:border-white/20 bg-white/[0.02]"}`}
             >
               {videoFile ? (
                 <div className="flex flex-col items-center gap-2 px-2 text-center">
-                  <Film className="w-8 h-8 text-purple-400" />
-                  <span className="text-xs text-purple-300 break-all line-clamp-2">{videoFile.name}</span>
+                  <Film className="w-8 h-8 text-[#ea3c12]" />
+                  <span className="text-xs text-[#ea3c12]/80 break-all line-clamp-2">{videoFile.name}</span>
                 </div>
               ) : (
                 <>
@@ -175,7 +156,6 @@ function UploadModal({ onClose, onSuccess }) {
           </div>
         </div>
 
-        {/* Error */}
         {error && (
           <div className="flex items-center gap-2 text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 mb-4 text-sm">
             <AlertCircle className="w-4 h-4 shrink-0" />
@@ -183,14 +163,13 @@ function UploadModal({ onClose, onSuccess }) {
           </div>
         )}
 
-        {/* Upload Button */}
         <button
           onClick={handleUpload}
           disabled={uploading}
-          className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-800 text-white py-3.5 rounded-2xl font-semibold transition-all text-sm disabled:cursor-not-allowed"
+          className="w-full flex items-center justify-center gap-2 bg-[#fcf5eb] hover:bg-white text-[#111] py-3.5 rounded-xl font-bold transition-all text-sm disabled:opacity-50"
         >
           {uploading ? (
-            <><Loader2 className="w-4 h-4 animate-spin" /> Uploading…</>
+            <><Loader2 className="w-4 h-4 animate-spin" /> Uploading...</>
           ) : (
             <><Upload className="w-4 h-4" /> Upload Motionbook</>
           )}
@@ -200,12 +179,9 @@ function UploadModal({ onClose, onSuccess }) {
   );
 }
 
-// ─── Motionbook Card ──────────────────────────────────────────────────────────
 function MotionbookCard({ mb, onDelete }) {
   const [copied, setCopied] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState(false);
-
   const scanUrl = `${window.location.origin}/scan`;
 
   const handleCopy = () => {
@@ -215,14 +191,13 @@ function MotionbookCard({ mb, onDelete }) {
   };
 
   const handleDelete = async () => {
-    if (!confirmDelete) { setConfirmDelete(true); return; }
+    if (!window.confirm("Delete this motionbook?")) return;
     setDeleting(true);
     try {
       await deleteMotionbook(mb._id);
       onDelete(mb._id);
     } catch {
       setDeleting(false);
-      setConfirmDelete(false);
     }
   };
 
@@ -232,71 +207,36 @@ function MotionbookCard({ mb, onDelete }) {
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9 }}
-      className="group relative bg-white/[0.03] border border-white/8 rounded-2xl overflow-hidden hover:border-white/15 transition-all duration-300"
+      className="group relative bg-[#1c1c1c] border border-white/10 rounded-2xl overflow-hidden hover:border-[#ea3c12]/50 transition-all duration-300"
     >
-      {/* Thumbnail */}
       <div className="relative aspect-video overflow-hidden bg-black/40">
         <img
           src={mb.imageUrl}
           alt={mb.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
-        {/* Video indicator overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
         <div className="absolute bottom-3 left-3 flex items-center gap-1.5 bg-black/60 backdrop-blur-md rounded-full px-2.5 py-1 text-xs text-white">
-          <PlayCircle className="w-3 h-3 text-indigo-400" />
+          <PlayCircle className="w-3 h-3 text-[#ea3c12]" />
           <span>Video linked</span>
         </div>
-        {/* Delete confirm flash */}
-        <AnimatePresence>
-          {confirmDelete && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-red-900/80 backdrop-blur-sm flex items-center justify-center"
-            >
-              <div className="text-center">
-                <p className="text-white text-sm font-medium mb-3">Delete this motionbook?</p>
-                <div className="flex gap-2 justify-center">
-                  <button
-                    onClick={() => setConfirmDelete(false)}
-                    className="px-3 py-1.5 rounded-lg bg-white/10 text-white text-xs hover:bg-white/20 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleDelete}
-                    disabled={deleting}
-                    className="px-3 py-1.5 rounded-lg bg-red-500 text-white text-xs hover:bg-red-400 transition-colors flex items-center gap-1"
-                  >
-                    {deleting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
-                    Delete
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
 
-      {/* Card Body */}
       <div className="p-4">
         <h3 className="font-semibold text-white text-sm mb-3 truncate">{mb.title}</h3>
         <div className="flex items-center gap-2">
-          {/* Share Scan Link */}
           <button
             onClick={handleCopy}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 hover:text-indigo-200 text-xs font-medium transition-all border border-indigo-500/20"
+            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 text-xs font-medium transition-all"
           >
             {copied ? <><Check className="w-3 h-3" /> Copied!</> : <><Copy className="w-3 h-3" /> Share Scanner</>}
           </button>
-          {/* Delete */}
           <button
             onClick={handleDelete}
-            className="p-2 rounded-xl bg-white/5 hover:bg-red-500/20 text-gray-500 hover:text-red-400 transition-all border border-white/5"
+            disabled={deleting}
+            className="p-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-all"
           >
-            <Trash2 className="w-3.5 h-3.5" />
+            {deleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
           </button>
         </div>
       </div>
@@ -304,7 +244,6 @@ function MotionbookCard({ mb, onDelete }) {
   );
 }
 
-// ─── Dashboard ────────────────────────────────────────────────────────────────
 export default function Dashboard() {
   const navigate = useNavigate();
   const [motionbooks, setMotionbooks] = useState([]);
@@ -313,7 +252,6 @@ export default function Dashboard() {
   const [showUpload, setShowUpload] = useState(false);
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
-  const firstName = user?.name?.split(" ")[0] || "there";
 
   const fetchData = useCallback(async () => {
     try {
@@ -337,225 +275,122 @@ export default function Dashboard() {
     navigate("/");
   };
 
-  const handleUploadSuccess = (newMb) => {
-    setMotionbooks((prev) => [newMb, ...prev]);
-    setShowUpload(false);
-  };
-
-  const handleDelete = (id) => {
-    setMotionbooks((prev) => prev.filter((mb) => mb._id !== id));
-  };
-
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white flex">
-
-      {/* ── Sidebar ── */}
-      <aside className="w-64 shrink-0 border-r border-white/5 bg-black/60 flex flex-col p-5 sticky top-0 h-screen">
-        {/* Logo */}
-        <Link to="/" className="flex items-center gap-2.5 mb-10 hover:opacity-80 transition-opacity">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-            <PlayCircle className="w-4.5 h-4.5 text-white" />
+    <div className="min-h-screen bg-[#0a0a0a] text-white pt-8 pb-32 px-4 sm:px-6">
+      <div className="max-w-4xl mx-auto space-y-8">
+        
+        {/* Profile Header */}
+        <div className="bg-[#111] border border-white/10 rounded-[32px] p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 rounded-full bg-[#fcf5eb] flex items-center justify-center text-2xl font-bold text-[#111] shrink-0">
+              {user.name?.[0]?.toUpperCase() || "U"}
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight text-[#fcf5eb]">{user.name}</h1>
+              <p className="text-gray-400">{user.email}</p>
+            </div>
           </div>
-          <span className="text-lg font-bold tracking-tight">Motionbook</span>
-        </Link>
-
-        {/* Nav */}
-        <nav className="flex-1 space-y-1.5">
-          <div className="flex items-center gap-3 px-3.5 py-2.5 bg-indigo-600/15 border border-indigo-500/20 rounded-xl text-indigo-300 text-sm font-medium">
-            <LayoutDashboard className="w-4 h-4" /> My Projects
-          </div>
-          <Link
-            to="/scan"
-            className="flex items-center gap-3 px-3.5 py-2.5 text-gray-400 hover:bg-white/5 hover:text-white rounded-xl transition-all text-sm"
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 px-6 py-3 rounded-full border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-colors text-sm font-medium"
           >
-            <Scan className="w-4 h-4" /> AR Scanner
-          </Link>
+            <LogOut className="w-4 h-4" /> Sign Out
+          </button>
+        </div>
 
-          {subscription && (
-            <div className="mt-6 pt-4 border-t border-white/5">
-              <div className="mb-2 flex items-center justify-between">
-                <span className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Your Plan</span>
-                <Link to="/upgrade" className="text-xs text-indigo-400 hover:text-indigo-300">Upgrade</Link>
-              </div>
-              <div className="p-3 bg-white/[0.02] border border-white/5 rounded-xl">
-                <div className="mb-4">
-                  <PlanBadge planType={subscription.planId?.type || 'demo'} planName={subscription.planId?.name || 'Demo Plan'} />
+        {/* Current Plan Details */}
+        {subscription && (
+          <div className="bg-[#111] border border-white/10 rounded-[32px] p-6 sm:p-8 relative overflow-hidden">
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-2 h-1/2 bg-[#ea3c12] rounded-r-xl" />
+            <div className="pl-4">
+              <div className="flex justify-between items-start mb-6">
+                <div>
+                  <h2 className="text-xl font-bold text-[#fcf5eb] mb-1">Your Plan</h2>
+                  <p className="text-gray-400 text-sm">Manage your limits and storage</p>
                 </div>
-                
-                {/* Storage Bar */}
-                <div className="mb-3">
+                <div className="bg-[#ea3c12]/10 border border-[#ea3c12]/30 text-[#ea3c12] px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide">
+                  {subscription.planId?.name || 'Demo'}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
                   <StorageBar 
                     usedBytes={subscription.storageUsedBytes || 0} 
                     totalBytes={subscription.planId?.maxStorageBytes || 5 * 1024 * 1024 * 1024} 
                   />
                 </div>
-
-                {/* Photos Limit */}
-                <div className="space-y-1.5 mt-3">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-gray-400">Photos</span>
-                    <span className="text-gray-300">{subscription.photosUploaded || 0} / {subscription.planId?.maxPhotos || 100}</span>
+                <div>
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="text-gray-400 font-medium">Photos Used</span>
+                    <span className="text-[#fcf5eb]">{subscription.photosUploaded || 0} / {subscription.planId?.maxPhotos || 100}</span>
                   </div>
-                  <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                  <div className="h-2 bg-white/10 rounded-full overflow-hidden">
                     <div 
-                      className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"
+                      className="h-full bg-[#ea3c12] rounded-full"
                       style={{ width: `${Math.min(((subscription.photosUploaded || 0) / (subscription.planId?.maxPhotos || 100)) * 100, 100)}%` }}
                     />
                   </div>
                 </div>
               </div>
-            </div>
-          )}
-        </nav>
 
-        {/* User + Logout */}
-        <div className="border-t border-white/5 pt-4 mt-4">
-          <div className="flex items-center gap-3 mb-3 px-2">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-xs font-bold text-white shrink-0">
-              {firstName[0]?.toUpperCase()}
-            </div>
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-white truncate">{user.name}</p>
-              <p className="text-xs text-gray-500 truncate">{user.email}</p>
+              <div className="mt-8 pt-6 border-t border-white/10 text-right">
+                <Link to="/pricing" className="text-sm font-semibold text-[#ea3c12] hover:text-[#d6330d] transition-colors">
+                  Upgrade Plan →
+                </Link>
+              </div>
             </div>
           </div>
-          <button
-            onClick={handleLogout}
-            className="flex w-full items-center gap-3 px-3.5 py-2.5 text-red-400 hover:bg-red-500/10 rounded-xl transition-all text-sm"
-          >
-            <LogOut className="w-4 h-4" /> Sign out
-          </button>
-        </div>
-      </aside>
+        )}
 
-      {/* ── Main ── */}
-      <main className="flex-1 p-8 overflow-auto">
-        <div className="max-w-6xl mx-auto">
-
-          {/* Upgrade Banner */}
-          {subscription && subscription.planId?.type === 'demo' && (
-            <UpgradeBanner reason="demo_expiring_soon" />
-          )}
-          {subscription && subscription.storageUsedBytes >= (subscription.planId?.maxStorageBytes || 5 * 1024 * 1024 * 1024) && (
-            <UpgradeBanner reason="storage_full" />
-          )}
-
-          {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10"
-          >
-            <div>
-              <p className="text-sm text-gray-500 mb-0.5">Welcome back, {firstName} 👋</p>
-              <h1 className="text-3xl font-bold tracking-tight">My Motionbooks</h1>
-              <p className="text-gray-500 text-sm mt-1">
-                {motionbooks.length} project{motionbooks.length !== 1 ? "s" : ""} · Each links a photo to a video that plays on scan
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <Link
-                to="/scan"
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/8 text-sm font-medium text-gray-300 hover:text-white transition-all"
-              >
-                <Scan className="w-4 h-4" /> Try Scanner
-              </Link>
-              <button
-                onClick={() => setShowUpload(true)}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition-all shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/30 hover:-translate-y-0.5"
-              >
-                <PlusCircle className="w-4 h-4" /> New Motionbook
-              </button>
-            </div>
-          </motion.div>
-
-          {/* How it works banner */}
-          {motionbooks.length === 0 && !loading && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-8 rounded-2xl border border-indigo-500/20 bg-indigo-500/5 p-6"
+        {/* Upload & Motionbooks */}
+        <div className="pt-4">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-[#fcf5eb] tracking-tight">Your Motionbooks</h2>
+            <button
+              onClick={() => setShowUpload(true)}
+              className="flex items-center gap-2 bg-[#fcf5eb] hover:bg-white text-[#111] px-5 py-2.5 rounded-full font-bold transition-colors text-sm"
             >
-              <h3 className="text-sm font-semibold text-indigo-300 mb-4 uppercase tracking-widest">How Motionbook Works</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {[
-                  { icon: <ImageIcon className="w-5 h-5 text-indigo-400" />, step: "1", label: "Upload a Photo", desc: "Any printed or displayed photo you want to bring to life" },
-                  { icon: <Video className="w-5 h-5 text-purple-400" />, step: "2", label: "Link a Video", desc: "The video that plays when someone scans your photo" },
-                  { icon: <Scan className="w-5 h-5 text-pink-400" />, step: "3", label: "Scan & Watch", desc: "Open /scan on any mobile — point camera at the photo → magic!" },
-                ].map((item) => (
-                  <div key={item.step} className="flex items-start gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-white/5 flex items-center justify-center shrink-0">
-                      {item.icon}
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500 mb-0.5">Step {item.step}</p>
-                      <p className="text-sm font-semibold text-white">{item.label}</p>
-                      <p className="text-xs text-gray-400 mt-0.5 leading-relaxed">{item.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          )}
+              <PlusCircle className="w-4 h-4" /> Upload
+            </button>
+          </div>
 
-          {/* Content */}
           {loading ? (
-            <div className="flex items-center justify-center h-64">
-              <Loader2 className="w-8 h-8 text-indigo-400 animate-spin" />
+            <div className="flex items-center justify-center h-40">
+              <Loader2 className="w-8 h-8 text-[#ea3c12] animate-spin" />
             </div>
           ) : motionbooks.length === 0 ? (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex flex-col items-center justify-center border-2 border-dashed border-white/8 rounded-3xl py-20 text-center"
-            >
-              <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mb-5">
-                <Film className="w-7 h-7 text-gray-500" />
-              </div>
-              <h3 className="text-lg font-bold mb-2 text-white">No Motionbooks yet</h3>
-              <p className="text-gray-500 text-sm mb-6 max-w-xs">
-                Upload your first photo + video pair to create an AR experience.
-              </p>
+            <div className="border border-white/10 bg-[#111] rounded-3xl py-16 text-center">
+              <Film className="w-10 h-10 text-gray-600 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-white mb-2">No motionbooks yet</h3>
+              <p className="text-gray-400 text-sm mb-6">Create your first AR experience.</p>
               <button
                 onClick={() => setShowUpload(true)}
-                className="flex items-center gap-2 bg-white text-black px-6 py-3 rounded-xl font-semibold text-sm hover:bg-gray-100 transition-colors"
+                className="bg-white/10 hover:bg-white/20 text-white px-6 py-2.5 rounded-full font-medium transition-colors text-sm"
               >
-                <PlusCircle className="w-4 h-4" /> Create First Motionbook
+                Create Now
               </button>
-            </motion.div>
+            </div>
           ) : (
-            <motion.div
-              layout
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
-            >
+            <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               <AnimatePresence mode="popLayout">
                 {motionbooks.map((mb) => (
-                  <MotionbookCard key={mb._id} mb={mb} onDelete={handleDelete} />
+                  <MotionbookCard key={mb._id} mb={mb} onDelete={(id) => setMotionbooks(prev => prev.filter(m => m._id !== id))} />
                 ))}
               </AnimatePresence>
-
-              {/* Add More Card */}
-              <motion.button
-                layout
-                onClick={() => setShowUpload(true)}
-                className="aspect-video sm:aspect-auto rounded-2xl border-2 border-dashed border-white/8 hover:border-indigo-500/40 bg-white/[0.015] hover:bg-indigo-500/5 flex flex-col items-center justify-center gap-3 text-gray-600 hover:text-indigo-400 transition-all min-h-[180px] group"
-              >
-                <div className="w-10 h-10 rounded-xl border border-current/30 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <PlusCircle className="w-5 h-5" />
-                </div>
-                <span className="text-sm font-medium">New Motionbook</span>
-              </motion.button>
             </motion.div>
           )}
         </div>
-      </main>
+      </div>
 
-      {/* ── Upload Modal ── */}
       <AnimatePresence>
         {showUpload && (
           <UploadModal
             onClose={() => setShowUpload(false)}
-            onSuccess={handleUploadSuccess}
+            onSuccess={(newMb) => {
+              setMotionbooks(prev => [newMb, ...prev]);
+              setShowUpload(false);
+            }}
           />
         )}
       </AnimatePresence>

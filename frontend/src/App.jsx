@@ -8,8 +8,16 @@ import PricingPage from './components/PricingPage';
 import ReferralPage from './components/ReferralPage';
 import UpgradePage from './components/UpgradePage';
 import AdminPanel from './components/AdminPanel';
+import BottomNav from './components/ui/BottomNav';
 import { isAuthenticated, isAdminAuthenticated } from './api';
 import './App.css';
+
+const Layout = ({ children }) => (
+  <div className="pb-[72px]"> {/* Pad for bottom nav */}
+    {children}
+    <BottomNav />
+  </div>
+);
 
 const ProtectedRoute = ({ children }) => {
   if (!isAuthenticated()) return <Navigate to="/login" replace />;
@@ -26,19 +34,19 @@ function App() {
     <Router>
       <Routes>
         {/* Public */}
-        <Route path="/" element={<LandingPage />} />
+        <Route path="/" element={<Layout><LandingPage /></Layout>} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
-        <Route path="/pricing" element={<PricingPage />} />
-        <Route path="/scan" element={<ScanPage />} />
+        <Route path="/pricing" element={<Layout><PricingPage /></Layout>} />
+        <Route path="/scan" element={<Layout><ScanPage /></Layout>} />
 
         {/* Admin (separate auth) */}
         <Route path="/admin" element={<AdminPanel />} />
 
         {/* Protected */}
-        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/referral" element={<ProtectedRoute><ReferralPage /></ProtectedRoute>} />
-        <Route path="/upgrade" element={<ProtectedRoute><UpgradePage /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>} />
+        <Route path="/referral" element={<ProtectedRoute><Layout><ReferralPage /></Layout></ProtectedRoute>} />
+        <Route path="/upgrade" element={<ProtectedRoute><Layout><UpgradePage /></Layout></ProtectedRoute>} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

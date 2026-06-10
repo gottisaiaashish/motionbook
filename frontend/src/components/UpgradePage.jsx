@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { getPlans, createRazorpayOrder, verifyRazorpayPayment, getMySubscription } from "../api";
-import {
-  PlayCircle, ChevronLeft, Check,
-  Zap, CreditCard, CheckCircle, AlertCircle
-} from "lucide-react";
+import { PlayCircle, ChevronLeft, CreditCard, CheckCircle, AlertCircle } from "lucide-react";
+
+const formatPrice = (price) =>
+  price === 0 ? "Free" : `₹${price.toLocaleString("en-IN")}`;
 
 const loadRazorpayScript = () => {
   return new Promise((resolve) => {
@@ -63,7 +63,6 @@ export default function UpgradePage() {
         throw new Error("Razorpay SDK failed to load. Are you online?");
       }
 
-      // Create order on backend
       const orderData = await createRazorpayOrder(selected._id);
 
       if (!orderData.keyId) {
@@ -98,7 +97,7 @@ export default function UpgradePage() {
           email: user.email || "",
         },
         theme: {
-          color: "#4f46e5", // indigo-600
+          color: "#ea3c12",
         },
       };
 
@@ -111,27 +110,27 @@ export default function UpgradePage() {
     } catch (err) {
       setError(err.message);
     } finally {
-      setLoading(false); // Only unset loading if it failed to open, otherwise handler unsets it
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen" style={{ background: "#0a0a0a", fontFamily: "'Inter', sans-serif" }}>
+    <div className="min-h-screen bg-[#141414] text-[#fcf5eb] font-sans pb-24">
       {/* Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center gap-3 border-b border-white/5 backdrop-blur-xl" style={{ background: "rgba(10,10,10,0.9)" }}>
+      <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center gap-3 border-b border-white/5 backdrop-blur-xl" style={{ background: "rgba(20,20,20,0.9)" }}>
         <button onClick={() => step === "plans" ? navigate(-1) : setStep("plans")}
           className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
           <ChevronLeft className="w-5 h-5" />
         </button>
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+          <div className="w-7 h-7 rounded-lg bg-[#ea3c12] flex items-center justify-center">
             <PlayCircle className="w-4 h-4 text-white" />
           </div>
-          <span className="text-white font-black">Upgrade Plan</span>
+          <span className="text-white font-black tracking-tight">Upgrade Plan</span>
         </div>
       </nav>
 
-      <div className="pt-24 pb-16 px-4 max-w-5xl mx-auto">
+      <div className="pt-24 px-4 sm:px-6 max-w-5xl mx-auto">
         {/* Expired Banner */}
         {currentSub?.subscription?.isExpired && (
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
@@ -147,59 +146,67 @@ export default function UpgradePage() {
         <AnimatePresence mode="wait">
           {/* ── Step 1: Plan Selection ── */}
           {step === "plans" && !done && (
-            <motion.div key="plans" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <div className="text-center mb-8">
-                <h1 className="text-3xl font-black text-white mb-2">Choose Your Plan</h1>
-                <p className="text-gray-400">One-time payment · 10 years access</p>
+            <motion.div key="plans" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center">
+              <div className="text-center mb-10 mt-6">
+                <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-2">Upgrade Package</h1>
+                <p className="text-gray-400">One-time payment • Lifetime access</p>
               </div>
 
               {/* Tab */}
-              <div className="flex justify-center mb-8">
-                <div className="inline-flex p-1 rounded-2xl" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                  {[{ key: "user", label: "👤 Personal" }, { key: "photographer", label: "🎥 Photographer" }].map((t) => (
+              <div className="flex justify-center mb-12">
+                <div className="flex bg-[#222] p-1 rounded-full">
+                  {[{ key: "user", label: "Personal" }, { key: "photographer", label: "Photographer" }].map((t) => (
                     <button key={t.key} onClick={() => setActiveTab(t.key)}
-                      className={`px-5 py-2 rounded-xl text-sm font-semibold transition-all ${activeTab === t.key ? "bg-indigo-500 text-white" : "text-gray-400 hover:text-white"}`}>
+                      className={`px-8 py-3 rounded-full text-sm font-medium transition-all ${activeTab === t.key ? "bg-[#fcf5eb] text-[#141414]" : "text-gray-400 hover:text-gray-200"}`}>
                       {t.label}
                     </button>
                   ))}
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+              <div className="w-full max-w-4xl flex flex-col gap-6">
                 {(activeTab === "user" ? userPlans : photographerPlans).map((plan) => {
-                  const isPopular = plan.badge === "Popular" || plan.badge === "Best Value" || plan.badge === "Enterprise";
                   return (
-                    <motion.div key={plan._id} whileHover={{ y: -5 }}
+                    <div
+                      key={plan._id}
                       onClick={() => handleSelectPlan(plan)}
-                      className={`cursor-pointer ${isPopular ? "p-8 rounded-3xl bg-gradient-to-b from-indigo-900/50 to-black border border-indigo-500/30 relative overflow-hidden flex flex-col shadow-2xl shadow-indigo-500/10" : "p-8 rounded-3xl bg-white/5 border border-white/10 flex flex-col relative overflow-hidden"}`}>
-                      
-                      {plan.badge && (
-                        <div className={`absolute top-0 right-0 text-white text-xs font-bold px-4 py-1.5 rounded-bl-lg ${isPopular ? "bg-indigo-500" : "bg-gray-600"}`}>
-                          {plan.badge.toUpperCase()}
-                        </div>
-                      )}
-                      
-                      <h3 className={`text-2xl font-bold mb-2 flex items-center gap-2 ${isPopular ? "text-indigo-100" : ""}`}>
-                        <span className="text-2xl">{plan.icon}</span> {plan.name}
-                      </h3>
-                      
-                      <div className="text-4xl font-extrabold mb-6">
-                        ₹{plan.price.toLocaleString("en-IN")}
-                        <span className={`text-sm font-normal ${isPopular ? "text-indigo-300" : "text-gray-500"}`}> / one-time</span>
+                      className="relative group bg-[#fcf5eb] rounded-[32px] p-8 sm:p-10 flex flex-col sm:flex-row items-center justify-between gap-8 cursor-pointer transition-transform hover:-translate-y-1 hover:shadow-2xl"
+                    >
+                      {/* Left decorative accent */}
+                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-3 h-1/2 bg-[#ea3c12] rounded-r-xl" />
+
+                      {/* Left Side: Title & Badge */}
+                      <div className="flex-1 pl-4">
+                        <h3 className="text-[#141414] text-2xl sm:text-3xl font-bold tracking-tight mb-2">
+                          {plan.name}
+                        </h3>
+                        {plan.badge && (
+                          <span className="inline-block px-3 py-1 bg-gray-200 text-gray-800 text-xs font-semibold rounded-full uppercase tracking-wider mb-2">
+                            {plan.badge}
+                          </span>
+                        )}
+                        <p className="text-gray-600 text-sm max-w-sm mt-2 leading-relaxed">
+                          {plan.maxAlbums >= 100 ? "Unlimited" : plan.maxAlbums} Albums • {plan.maxPhotos >= 10000 ? "Unlimited" : plan.maxPhotos} Photos • {plan.validityDays >= 3650 ? "Lifetime Access" : `${plan.validityDays} Days Access`}
+                        </p>
                       </div>
-                      
-                      <ul className={`space-y-4 mb-8 flex-1 ${isPopular ? "text-indigo-100/80" : "text-gray-300"}`}>
-                        {plan.features?.map((f, i) => (
-                          <li key={i} className="flex items-center gap-2 text-sm">
-                            <Check className={`w-4 h-4 flex-shrink-0 ${isPopular ? "text-indigo-400" : "text-gray-400"}`} />{f}
-                          </li>
+
+                      {/* Middle: Price */}
+                      <div className="flex-shrink-0 text-center sm:text-right flex items-baseline gap-1">
+                        <span className="text-[#141414] text-4xl sm:text-5xl font-extrabold tracking-tight">
+                          {formatPrice(plan.price)}
+                        </span>
+                      </div>
+
+                      {/* Right Side: Features */}
+                      <div className="flex-1 flex flex-col gap-2">
+                        {plan.features?.slice(0, 4).map((f, i) => (
+                          <div key={i} className="flex items-start gap-3 text-sm text-gray-700">
+                            <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mt-1.5 shrink-0" />
+                            <span>{f}</span>
+                          </div>
                         ))}
-                      </ul>
-                      
-                      <button className={`block text-center w-full py-4 rounded-xl font-semibold transition-colors mt-auto ${isPopular ? "bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-500/25" : "bg-white/10 hover:bg-white/20"}`}>
-                        Select Plan
-                      </button>
-                    </motion.div>
+                      </div>
+                    </div>
                   );
                 })}
               </div>
@@ -210,35 +217,33 @@ export default function UpgradePage() {
           {step === "payment" && selected && !done && (
             <motion.div key="payment" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}
               className="max-w-md mx-auto">
-              <div className="p-8 rounded-3xl mb-4 bg-gradient-to-b from-indigo-900/30 to-black border border-indigo-500/30 shadow-2xl shadow-indigo-500/10">
-                <h3 className="text-2xl font-bold mb-2 flex items-center gap-2 text-indigo-100">
-                  <span className="text-2xl">{selected.icon}</span> {selected.name}
+              <div className="p-8 rounded-[32px] mb-6 bg-[#fcf5eb] text-[#141414] shadow-2xl relative overflow-hidden">
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-3 h-1/2 bg-[#ea3c12] rounded-r-xl" />
+                <h3 className="text-2xl font-bold mb-2 tracking-tight pl-4">
+                  {selected.name}
                 </h3>
-                <div className="text-4xl font-extrabold mb-6">
-                  ₹{selected.price?.toLocaleString("en-IN")}
-                  <span className="text-sm text-indigo-300 font-normal"> / one-time</span>
+                <div className="text-4xl font-extrabold mb-6 pl-4">
+                  {formatPrice(selected.price)}
+                  <span className="text-sm text-gray-500 font-normal ml-1">one-time</span>
                 </div>
-                <ul className="space-y-4 mb-6 text-indigo-100/80">
+                <ul className="space-y-3 mb-6 pl-4">
                   {selected.features?.map((f, i) => (
-                    <li key={i} className="flex items-center gap-2 text-sm">
-                      <Check className="w-4 h-4 text-indigo-400 flex-shrink-0" />{f}
+                    <li key={i} className="flex items-start gap-3 text-sm text-gray-700">
+                      <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mt-1.5 shrink-0" />
+                      <span>{f}</span>
                     </li>
                   ))}
                 </ul>
-                <div className="p-3 rounded-xl text-xs text-indigo-200 flex items-center gap-2" style={{ background: "rgba(79,70,229,0.1)", border: "1px solid rgba(79,70,229,0.3)" }}>
-                  <Zap className="w-4 h-4 text-indigo-400" />
-                  Instant Activation via Razorpay
-                </div>
               </div>
               
-              {error && <div className="text-red-400 text-sm mb-3 p-3 rounded-xl bg-red-500/10 border border-red-500/20">{error}</div>}
+              {error && <div className="text-red-400 text-sm mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20">{error}</div>}
               
               <button onClick={handlePayment} disabled={loading}
-                className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/25">
-                {loading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><CreditCard className="w-5 h-5" />Pay with Razorpay</>}
+                className="w-full py-4 bg-[#ea3c12] hover:bg-[#d6330d] text-white font-bold rounded-2xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-orange-500/25">
+                {loading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><CreditCard className="w-5 h-5" />Pay Securely</>}
               </button>
-              <button onClick={() => setStep("plans")} className="mt-3 w-full py-2.5 text-gray-400 hover:text-white text-sm transition-colors">
-                ← Back to Plans
+              <button onClick={() => setStep("plans")} className="mt-4 w-full py-2.5 text-gray-400 hover:text-white text-sm transition-colors">
+                ← Back to Packages
               </button>
             </motion.div>
           )}
@@ -250,11 +255,11 @@ export default function UpgradePage() {
               <div className="w-20 h-20 rounded-3xl bg-green-500/10 border border-green-500/20 flex items-center justify-center mx-auto mb-6">
                 <CheckCircle className="w-10 h-10 text-green-400" />
               </div>
-              <h2 className="text-white font-black text-2xl mb-3">Payment Successful! 🎉</h2>
-              <p className="text-gray-400 mb-8">Your {selected?.name} has been instantly activated. You can now continue using Motionbook.</p>
-              <Link to="/dashboard"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-colors">
-                Go to Dashboard
+              <h2 className="text-white font-bold text-3xl mb-3 tracking-tight">Payment Successful!</h2>
+              <p className="text-gray-400 mb-8 leading-relaxed">Your {selected?.name} package has been instantly activated. You can now continue using Motionbook.</p>
+              <Link to="/profile"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-[#ea3c12] hover:bg-[#d6330d] text-white font-bold rounded-2xl transition-colors shadow-lg shadow-orange-500/25">
+                Go to Profile
               </Link>
             </motion.div>
           )}

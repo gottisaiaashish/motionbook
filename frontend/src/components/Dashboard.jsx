@@ -105,7 +105,12 @@ export default function Dashboard() {
               else if (body.error === 'PHOTO_LIMIT_REACHED') message = body.message || "Photo limit reached. Please upgrade.";
               else if (body.error === 'STORAGE_LIMIT_REACHED') message = body.message || "Storage full. Please upgrade.";
               else if (body.error === 'VIDEO_SIZE_EXCEEDED') message = body.message || "Video file too large for your plan.";
-              else message = body.message || body.error || "Upload failed.";
+              else {
+                message = body.message || "Upload failed.";
+                if (body.error && body.error !== body.message) {
+                  message += ` (${body.error})`;
+                }
+              }
             } catch {}
             reject(new Error(message));
           }

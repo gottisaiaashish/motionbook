@@ -1,6 +1,5 @@
 @import "tailwindcss";
-@import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 @theme {
   --font-sans: "Inter", system-ui, sans-serif;
@@ -10,4 +9,22 @@ body {
   margin: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #ffffff;
+  color: #111827;
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+@keyframes background-gradient {
+  0%, 100% {
+    transform: translate(calc(var(--tx-1) * 100%), calc(var(--ty-1) * 100%));
+  }
+  25% {
+    transform: translate(calc(var(--tx-2) * 100%), calc(var(--ty-2) * 100%));
+  }
+  50% {
+    transform: translate(calc(var(--tx-3) * 100%), calc(var(--ty-3) * 100%));
+  }
+  75% {
+    transform: translate(calc(var(--tx-4) * 100%), calc(var(--ty-4) * 100%));
+  }
 }

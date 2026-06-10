@@ -8,14 +8,14 @@ import PricingPage from './components/PricingPage';
 import ReferralPage from './components/ReferralPage';
 import UpgradePage from './components/UpgradePage';
 import AdminPanel from './components/AdminPanel';
-import BottomNav from './components/ui/BottomNav';
+import Navbar from './components/ui/Navbar';
 import { isAuthenticated, isAdminAuthenticated } from './api';
 import './App.css';
 
 const Layout = ({ children }) => (
-  <div className="pb-[72px]"> {/* Pad for bottom nav */}
+  <div className="relative">
+    <Navbar />
     {children}
-    <BottomNav />
   </div>
 );
 

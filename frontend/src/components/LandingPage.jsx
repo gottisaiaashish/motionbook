@@ -1,323 +1,349 @@
+import { useState, useRef } from "react";
+import { Link } from "react-router-dom";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { PlayCircle, ArrowRight, Camera, Zap, Cloud, Smartphone, Users, ChevronDown, CheckCircle2, Star, Maximize } from "lucide-react";
 
-import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Sparkles, PlayCircle, Layers, X, Star, CheckCircle2, Globe, MessageCircle, Mail, LogOut } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
-import Hyperspeed from "./Hyperspeed";
-import { isAuthenticated, logout } from "../api";
+const FAQItem = ({ question, answer }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <div className="border-b border-gray-200 py-4">
+      <button onClick={() => setIsOpen(!isOpen)} className="flex items-center justify-between w-full text-left">
+        <h4 className="text-lg font-medium text-gray-900">{question}</h4>
+        <motion.div animate={{ rotate: isOpen ? 180 : 0 }}>
+          <ChevronDown className="w-5 h-5 text-gray-400" />
+        </motion.div>
+      </button>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden"
+          >
+            <p className="pt-4 text-gray-500 leading-relaxed">{answer}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
 
 export default function LandingPage() {
-  const [showDemo, setShowDemo] = useState(false);
-  const navigate = useNavigate();
-  const loggedIn = isAuthenticated();
-  const user = loggedIn ? JSON.parse(localStorage.getItem('user') || '{}') : null;
-  const firstName = user?.name?.split(' ')[0] || 'there';
-
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-    window.location.reload();
-  };
+  const { scrollYProgress } = useScroll();
+  const heroY = useTransform(scrollYProgress, [0, 0.2], [0, 100]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white selection:bg-indigo-500/30 overflow-hidden font-sans">
-
-      {/* Removed Top Navbar */}
-
-      {/* Hero Section */}
-      <main className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 flex flex-col items-center justify-center min-h-screen">
-        {/* Hyperspeed Background */}
-        <div className="absolute inset-0 z-0 opacity-60">
-          <Hyperspeed />
-        </div>
-
-        {/* Background Glows */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-500/20 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[100px] pointer-events-none" />
-
-        <div className="relative z-10 max-w-5xl mx-auto px-6 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-sm font-medium text-indigo-300 mb-8"
-          >
-            <Sparkles className="w-4 h-4" />
-            <span>The future of digital storytelling</span>
-          </motion.div>
-
+    <div className="min-h-screen bg-white text-gray-900 selection:bg-blue-500/20 font-sans overflow-x-hidden">
+      
+      {/* 1. Hero Section */}
+      <section className="relative pt-40 pb-20 overflow-hidden flex flex-col items-center">
+        {/* Blue Gradient Background — same as pricing */}
+        <div
+          className="absolute inset-0 z-0 pointer-events-none"
+          style={{
+            background: "radial-gradient(125% 125% at 50% 90%, #fff 40%, #2529f8 100%)",
+          }}
+        />
+        
+        <motion.div style={{ y: heroY, opacity: heroOpacity }} className="relative z-10 max-w-6xl mx-auto px-6 text-center w-full mb-16">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-5xl md:text-7xl font-extrabold tracking-tight mb-8 leading-[1.1]"
+            transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
+            className="text-6xl md:text-8xl font-extrabold tracking-tighter mb-6 leading-[1.05] text-gray-900"
           >
-            Bring your stories to <br className="hidden md:block" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">
-              life with Motionbook.
+            Scan a Photo. <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-500">
+              Relive the Moment.
             </span>
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="max-w-2xl mx-auto text-lg md:text-xl text-gray-400 mb-10"
+            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+            className="max-w-2xl mx-auto text-xl text-gray-500 mb-10 leading-relaxed font-light"
           >
-            A premium platform to create, explore, and share breathtaking animated books and interactive experiences.
+            MotionBook transforms ordinary photos into living, breathing memories using advanced AI and Augmented Reality.
           </motion.p>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
+            transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
-            <Link to="/signup" className="flex items-center gap-2 bg-white text-black px-8 py-4 rounded-full font-semibold hover:scale-105 transition-transform shadow-[0_0_40px_rgba(255,255,255,0.2)]">
-              Get Started Free <ArrowRight className="w-5 h-5" />
+            <Link to="/signup" className="group relative flex items-center gap-2 bg-gray-900 text-white px-8 py-4 rounded-full font-semibold transition-all hover:scale-105 hover:shadow-xl">
+              Get Started
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
-            <button onClick={() => setShowDemo(true)} className="flex items-center gap-2 bg-white/5 border border-white/10 text-white px-8 py-4 rounded-full font-semibold hover:bg-white/10 transition-colors">
-              <PlayCircle className="w-5 h-5" /> Watch Demo
+            <button className="flex items-center gap-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-900 px-8 py-4 rounded-full font-semibold transition-all shadow-sm">
+              <PlayCircle className="w-5 h-5 text-blue-500" /> Watch Demo
             </button>
           </motion.div>
-        </div>
+        </motion.div>
 
-        {/* Floating UI Elements Mockup */}
+        {/* 3D AR Scanner Mockup */}
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.5 }}
-          className="mt-20 relative w-full max-w-5xl mx-auto px-6"
+          initial={{ opacity: 0, rotateX: 20, y: 100 }}
+          animate={{ opacity: 1, rotateX: 0, y: 0 }}
+          transition={{ duration: 1.2, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="relative w-[90%] md:w-[70%] max-w-5xl aspect-[16/9] perspective-[1000px] z-20 mt-8"
         >
-          <div className="aspect-video bg-gradient-to-br from-gray-900 to-black border border-white/10 rounded-2xl shadow-2xl overflow-hidden relative">
-            <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop')] bg-cover bg-center opacity-40 mix-blend-overlay"></div>
+          <div className="w-full h-full relative transform-gpu shadow-2xl rounded-t-3xl overflow-hidden border border-gray-200 bg-white">
+            <img 
+              src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=2564&auto=format&fit=crop" 
+              alt="Background" 
+              className="absolute inset-0 w-full h-full object-cover opacity-50 blur-[2px]" 
+            />
+            <motion.div 
+              animate={{ y: ["0%", "100%", "0%"] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+              className="absolute left-0 right-0 h-32 bg-gradient-to-b from-transparent via-blue-500/20 to-transparent border-b border-blue-500/50"
+            />
             <div className="absolute inset-0 flex items-center justify-center">
-              <button onClick={() => setShowDemo(true)} className="w-20 h-20 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20 cursor-pointer hover:bg-white/20 transition-colors">
-                <PlayCircle className="w-10 h-10 text-white ml-1" />
-              </button>
+              <div className="w-64 h-64 border border-blue-500/30 relative">
+                <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-blue-500"></div>
+                <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-blue-500"></div>
+                <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-blue-500"></div>
+                <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-blue-500"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <PlayCircle className="w-16 h-16 text-blue-500 opacity-80" />
+                </div>
+              </div>
             </div>
           </div>
         </motion.div>
-      </main>
+      </section>
 
-      {/* Trusted By Section */}
-      <section className="py-12 border-t border-white/5 bg-black/50">
+      {/* 2. How MotionBook Works */}
+      <section className="py-32 relative z-10 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-24">
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-gray-900">It feels like magic.</h2>
+            <p className="text-xl text-gray-500">Three simple steps to bring your memories to life.</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              { num: "01", title: "Upload your video", desc: "Select a video from your gallery. We automatically extract the best frame to use as the trigger photo." },
+              { num: "02", title: "Print the photo", desc: "Download the high-res trigger photo and print it for your physical photo album or canvas." },
+              { num: "03", title: "Scan & Relive", desc: "Open the MotionBook app, point it at the physical photo, and watch the video magically play inside the frame." }
+            ].map((step, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.6, delay: i * 0.2 }}
+                className="group p-8 rounded-3xl bg-white border border-gray-200 hover:shadow-xl transition-shadow"
+              >
+                <div className="text-6xl font-black text-gray-100 mb-6 group-hover:text-blue-100 transition-colors">{step.num}</div>
+                <h3 className="text-2xl font-semibold mb-4 text-gray-900">{step.title}</h3>
+                <p className="text-gray-500 leading-relaxed">{step.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 3. Interactive AR Demo */}
+      <section className="py-32 relative overflow-hidden bg-white">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center gap-16">
+          <div className="w-full md:w-1/2">
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 text-gray-900">Seamless AR Tracking</h2>
+            <p className="text-lg text-gray-500 mb-8 leading-relaxed">
+              Our proprietary computer vision engine instantly recognizes your physical prints from any angle, lighting condition, or distance. No QR codes or ugly markers required.
+            </p>
+            <ul className="space-y-4">
+              {["Lightning fast recognition", "Works offline", "Multi-photo tracking", "Perfect border alignment"].map((item, i) => (
+                <li key={i} className="flex items-center gap-3 text-gray-700">
+                  <CheckCircle2 className="w-5 h-5 text-blue-500" /> {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="w-full md:w-1/2 relative h-[500px]">
+            <motion.div 
+              initial={{ rotateY: -10, rotateX: 5 }}
+              whileHover={{ rotateY: 0, rotateX: 0 }}
+              transition={{ duration: 0.5 }}
+              className="absolute inset-0 bg-gray-900 border-4 border-gray-800 rounded-[3rem] overflow-hidden shadow-2xl flex items-center justify-center transform-gpu perspective-[1000px]"
+            >
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 w-32 h-6 bg-black rounded-full z-20"></div>
+              <div className="w-full h-full relative">
+                <img 
+                  src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=2564&auto=format&fit=crop" 
+                  alt="Wedding Photo" 
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center">
+                  <motion.div 
+                    animate={{ scale: [0.95, 1.05, 0.95] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="w-[80%] h-[60%] border-2 border-blue-500 shadow-[0_0_20px_#3b82f6] rounded-xl overflow-hidden relative bg-black/20"
+                  >
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <PlayCircle className="w-12 h-12 text-white/50" />
+                    </div>
+                  </motion.div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* 4. Features (Bento Box) */}
+      <section className="py-32 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-24">
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-gray-900">Designed for creators.</h2>
+            <p className="text-xl text-gray-500">Everything you need, packed into a beautiful interface.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 auto-rows-[300px]">
+            <motion.div className="md:col-span-2 md:row-span-2 rounded-3xl bg-white border border-gray-200 overflow-hidden relative group p-8 hover:shadow-xl transition-shadow">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <Camera className="w-8 h-8 text-blue-500 mb-6 relative z-10" />
+              <h3 className="text-3xl font-bold mb-4 text-gray-900 relative z-10">Pristine Quality</h3>
+              <p className="text-gray-500 text-lg relative z-10">We maintain the original resolution of your videos, streaming them instantly without quality loss or buffering delays.</p>
+            </motion.div>
+            
+            <motion.div className="md:col-span-2 rounded-3xl bg-white border border-gray-200 p-8 relative overflow-hidden group hover:shadow-xl transition-shadow">
+              <Cloud className="w-8 h-8 text-blue-500 mb-4" />
+              <h3 className="text-xl font-bold mb-2 text-gray-900">Cloud Synced</h3>
+              <p className="text-gray-500">Your albums are stored securely on our global CDN for instantaneous access.</p>
+            </motion.div>
+
+            <motion.div className="rounded-3xl bg-white border border-gray-200 p-8 relative overflow-hidden group hover:shadow-xl transition-shadow">
+              <Smartphone className="w-8 h-8 text-blue-500 mb-4" />
+              <h3 className="text-xl font-bold mb-2 text-gray-900">App-less Web AR</h3>
+              <p className="text-gray-500 text-sm">Scan directly from the browser. No app download required for your clients.</p>
+            </motion.div>
+
+            <motion.div className="rounded-3xl bg-white border border-gray-200 p-8 relative overflow-hidden group hover:shadow-xl transition-shadow">
+              <Zap className="w-8 h-8 text-blue-500 mb-4" />
+              <h3 className="text-xl font-bold mb-2 text-gray-900">Instant Setup</h3>
+              <p className="text-gray-500 text-sm">Upload, process, and deploy in less than 60 seconds.</p>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. Photographer Solutions */}
+      <section className="py-32 relative bg-white">
         <div className="max-w-7xl mx-auto px-6 text-center">
-          <p className="text-sm font-medium text-gray-500 mb-8 uppercase tracking-widest">Trusted by innovative teams worldwide</p>
-          <div className="flex flex-wrap justify-center gap-12 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
-            {/* Fake Brand Logos */}
-            {['Acme Corp', 'GlobalNet', 'Nexus', 'Starlight', 'Vortex'].map((brand) => (
-              <div key={brand} className="text-xl font-bold font-serif italic text-gray-300">{brand}</div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Features Grid */}
-      <section id="features" className="py-24 bg-black relative z-10 border-t border-white/5">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold mb-4">Powerful Features</h2>
-            <p className="text-gray-400">Everything you need to create amazing motion books.</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { title: "Fluid Animations", desc: "Create seamless transitions and interactions with our advanced editor." },
-              { title: "Cloud Storage", desc: "Your projects are safely synced and accessible from anywhere." },
-              { title: "Community", desc: "Share your work and collaborate with creators around the world." }
-            ].map((feature, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="p-8 rounded-2xl bg-white/5 border border-white/5 hover:border-white/10 transition-colors"
-              >
-                <div className="w-12 h-12 rounded-xl bg-indigo-500/20 flex items-center justify-center mb-6 text-indigo-400">
-                  <Layers className="w-6 h-6" />
-                </div>
-                <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
-                <p className="text-gray-400">{feature.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Explore Section */}
-      <section id="explore" className="py-24 bg-[#0a0a0a] relative z-10 border-t border-white/5">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
-            <div>
-              <h2 className="text-3xl md:text-5xl font-bold mb-4">Explore Creations</h2>
-              <p className="text-gray-400">Discover what others are building with Motionbook.</p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-blue-600 text-sm font-semibold mb-8 border border-blue-100"
+          >
+            <Users className="w-4 h-4" /> For Professionals
+          </motion.div>
+          <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-8 text-gray-900">Elevate your photography business.</h2>
+          <p className="max-w-3xl mx-auto text-xl text-gray-500 mb-12">
+            Offer MotionBooks as a premium add-on to your wedding, event, or portrait packages. Increase your revenue while providing clients with an unforgettable experience.
+          </p>
+          <div className="flex justify-center gap-6">
+            <div className="text-left bg-white border border-gray-200 rounded-2xl p-6 w-64 shadow-sm">
+              <div className="text-3xl font-bold text-gray-900 mb-2">+40%</div>
+              <div className="text-sm text-gray-500">Average increase in album package upsells.</div>
             </div>
-            <button className="text-indigo-400 hover:text-indigo-300 font-medium flex items-center gap-2">
-              View Gallery <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map((item) => (
-              <motion.div
-                key={item}
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: item * 0.1 }}
-                className="group relative aspect-[4/3] rounded-2xl overflow-hidden bg-white/5 cursor-pointer"
-              >
-                <div className={`absolute inset-0 bg-gradient-to-br ${item === 1 ? 'from-purple-500/40 to-indigo-500/40' : item === 2 ? 'from-pink-500/40 to-orange-500/40' : 'from-emerald-500/40 to-cyan-500/40'} mix-blend-overlay opacity-50 group-hover:opacity-80 transition-opacity duration-500`} />
-                <div className="absolute inset-0 p-6 flex flex-col justify-end bg-gradient-to-t from-black/80 via-black/20 to-transparent">
-                  <h3 className="text-xl font-bold mb-1 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">Project Alpha {item}</h3>
-                  <p className="text-sm text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">By CreatorName</p>
-                </div>
-              </motion.div>
-            ))}
+            <div className="text-left bg-white border border-gray-200 rounded-2xl p-6 w-64 shadow-sm">
+              <div className="text-3xl font-bold text-gray-900 mb-2">Zero</div>
+              <div className="text-sm text-gray-500">Coding or technical knowledge required.</div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="py-24 bg-black relative z-10 border-t border-white/5">
+      {/* 6. Customer Stories */}
+      <section className="py-32 bg-gray-50">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold mb-4">Loved by Creators</h2>
-            <p className="text-gray-400">See what our community has to say.</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <h2 className="text-3xl md:text-4xl font-bold mb-16 text-center text-gray-900">Loved by visual storytellers.</h2>
+          <div className="flex gap-6 overflow-x-auto pb-8 snap-x no-scrollbar">
             {[
-              { name: "Sarah Jenkins", role: "Digital Artist", quote: "Motionbook completely changed how I present my comic portfolios. The animations are so smooth!" },
-              { name: "David Chen", role: "Storyteller", quote: "The intuitive editor means I spend less time coding and more time crafting the perfect narrative." },
-              { name: "Emma Wright", role: "UI Designer", quote: "A game-changer for interactive mockups. The export quality is simply unmatched." }
-            ].map((review, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="p-8 rounded-3xl bg-gradient-to-b from-white/5 to-transparent border border-white/5"
-              >
-                <div className="flex text-yellow-500 mb-4">
+              { name: "Alex R.", role: "Wedding Photographer", quote: "I added MotionBook to my premium wedding packages. Clients literally cry when they scan their printed album and hear their vows play. It's incredible." },
+              { name: "Samantha T.", role: "Digital Artist", quote: "The AR tracking is the most stable I've ever seen. It perfectly locks onto the frame even in low light at art exhibitions." },
+              { name: "Michael B.", role: "Event Agency", quote: "We use it for corporate event photobooths. The wow factor is off the charts, and the backend management is so clean." }
+            ].map((story, i) => (
+              <div key={i} className="min-w-[350px] snap-center bg-white border border-gray-200 rounded-3xl p-8 hover:shadow-lg transition-shadow">
+                <div className="flex text-blue-500 mb-6 gap-1">
                   {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-current" />)}
                 </div>
-                <p className="text-gray-300 italic mb-6">&quot;{review.quote}&quot;</p>
+                <p className="text-lg text-gray-600 italic mb-8">&quot;{story.quote}&quot;</p>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-400 to-indigo-500" />
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-100 to-blue-200" />
                   <div>
-                    <h4 className="font-bold text-sm">{review.name}</h4>
-                    <p className="text-xs text-gray-500">{review.role}</p>
+                    <h4 className="font-bold text-gray-900">{story.name}</h4>
+                    <p className="text-sm text-gray-500">{story.role}</p>
                   </div>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Removed Pricing Section */}
+      {/* 7. FAQ */}
+      <section className="py-32 bg-white">
+        <div className="max-w-3xl mx-auto px-6">
+          <h2 className="text-3xl font-bold mb-12 text-center text-gray-900">Frequently Asked Questions</h2>
+          <div className="space-y-2">
+            <FAQItem 
+              question="Do clients need to download an app?" 
+              answer="No! Our Web AR technology allows anyone to scan the photo directly using their smartphone browser. No app downloads required." 
+            />
+            <FAQItem 
+              question="How long do the videos stay active?" 
+              answer="Videos remain active indefinitely as long as your professional subscription is active. We handle all the cloud storage and streaming bandwidth." 
+            />
+            <FAQItem 
+              question="Can I link multiple photos in one album?" 
+              answer="Yes! You can upload hundreds of photos and videos to a single workspace, creating a fully interactive photo album." 
+            />
+          </div>
+        </div>
+      </section>
 
-      {/* Bottom CTA */}
-      <section className="py-24 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-indigo-900/20 to-black"></div>
+      {/* 8. Bottom CTA */}
+      <section className="py-32 relative overflow-hidden border-t border-gray-100">
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: "radial-gradient(125% 125% at 50% 10%, #fff 40%, #2529f8 100%)",
+          }}
+        />
         <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
-          <h2 className="text-4xl md:text-6xl font-bold mb-6">Ready to create magic?</h2>
-          <p className="text-xl text-gray-400 mb-10">Join thousands of creators who are already using Motionbook.</p>
-          <Link to="/signup" className="inline-flex items-center gap-2 bg-white text-black px-10 py-5 rounded-full font-bold text-lg hover:scale-105 transition-transform shadow-[0_0_40px_rgba(255,255,255,0.2)]">
-            Start Creating Now <ArrowRight className="w-5 h-5" />
+          <h2 className="text-5xl md:text-7xl font-extrabold mb-8 tracking-tighter text-gray-900">Start creating magic.</h2>
+          <Link to="/signup" className="inline-flex items-center gap-2 bg-gray-900 text-white px-10 py-5 rounded-full font-bold text-lg hover:scale-105 transition-transform shadow-xl">
+            Create Free Account <ArrowRight className="w-5 h-5" />
           </Link>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-white/10 bg-black pt-16 pb-8">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
-            <div className="col-span-2 md:col-span-1">
-              <Link to="/" className="flex items-center gap-2 mb-4">
-                <div className="w-6 h-6 rounded bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                  <PlayCircle className="w-4 h-4 text-white" />
-                </div>
-                <span className="text-lg font-bold tracking-tight">Motionbook</span>
-              </Link>
-              <p className="text-sm text-gray-500 mb-6">Empowering creators to build interactive stories without limits.</p>
-              <div className="flex gap-4 text-gray-400">
-                <a href="#" className="hover:text-white transition-colors"><MessageCircle className="w-5 h-5" /></a>
-                <a href="#" className="hover:text-white transition-colors"><Globe className="w-5 h-5" /></a>
-                <a href="#" className="hover:text-white transition-colors"><Mail className="w-5 h-5" /></a>
-              </div>
-            </div>
-
-            <div>
-              <h4 className="font-bold mb-4 text-gray-200">Product</h4>
-              <ul className="space-y-2 text-sm text-gray-500">
-                <li><Link to="#features" className="hover:text-indigo-400 transition-colors">Features</Link></li>
-                <li><Link to="#explore" className="hover:text-indigo-400 transition-colors">Explore</Link></li>
-                <li><Link to="/changelog" className="hover:text-indigo-400 transition-colors">Changelog</Link></li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-bold mb-4 text-gray-200">Resources</h4>
-              <ul className="space-y-2 text-sm text-gray-500">
-                <li><Link to="/docs" className="hover:text-indigo-400 transition-colors">Documentation</Link></li>
-                <li><Link to="/community" className="hover:text-indigo-400 transition-colors">Community</Link></li>
-                <li><Link to="/templates" className="hover:text-indigo-400 transition-colors">Templates</Link></li>
-                <li><Link to="/blog" className="hover:text-indigo-400 transition-colors">Blog</Link></li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-bold mb-4 text-gray-200">Legal</h4>
-              <ul className="space-y-2 text-sm text-gray-500">
-                <li><Link to="/privacy" className="hover:text-indigo-400 transition-colors">Privacy Policy</Link></li>
-                <li><Link to="/terms" className="hover:text-indigo-400 transition-colors">Terms of Service</Link></li>
-                <li><Link to="/cookies" className="hover:text-indigo-400 transition-colors">Cookie Policy</Link></li>
-              </ul>
-            </div>
+      {/* 9. Footer */}
+      <footer className="py-12 border-t border-gray-200 bg-white">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-2">
+            <span className="font-bold tracking-tight text-gray-900">Motionbook</span>
           </div>
-
-          <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-600">
-            <p>© {new Date().getFullYear()} Motionbook Inc. All rights reserved.</p>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              <span>All systems operational</span>
-            </div>
+          <div className="flex gap-8 text-sm font-medium text-gray-500">
+            <Link to="/pricing" className="hover:text-gray-900 transition-colors">Pricing</Link>
+            <Link to="/contact" className="hover:text-gray-900 transition-colors">Contact</Link>
+            <Link to="/privacy" className="hover:text-gray-900 transition-colors">Privacy</Link>
+            <Link to="/terms" className="hover:text-gray-900 transition-colors">Terms</Link>
+          </div>
+          <div className="text-sm text-gray-400">
+            © {new Date().getFullYear()} Motionbook Inc.
           </div>
         </div>
       </footer>
 
-      {/* Demo Modal */}
-      <AnimatePresence>
-        {showDemo && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-sm"
-          >
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="relative w-full max-w-4xl aspect-video bg-gray-900 rounded-2xl overflow-hidden shadow-2xl border border-white/10"
-            >
-              <button
-                onClick={() => setShowDemo(false)}
-                className="absolute top-4 right-4 z-10 p-2 bg-black/50 hover:bg-black/80 rounded-full text-white transition-colors"
-              >
-                <X className="w-6 h-6" />
-              </button>
-              <div className="w-full h-full flex flex-col items-center justify-center text-center p-8">
-                <PlayCircle className="w-16 h-16 text-indigo-500 mb-4 opacity-50" />
-                <h3 className="text-2xl font-bold mb-2">Demo Video Coming Soon</h3>
-                <p className="text-gray-400">This placeholder will be replaced with an actual video component later.</p>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

@@ -1,135 +1,327 @@
-import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { getPlans } from "../api";
+import { useState, useId, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import NumberFlow from "@number-flow/react";
+import { CheckCheck, Zap } from "lucide-react";
+import { VerticalCutReveal } from "./ui/VerticalCutReveal";
+import { TimelineContent } from "./ui/TimelineContent";
 
-const formatPrice = (price) =>
-  price === 0 ? "Free" : `₹${price.toLocaleString("en-IN")}`;
+// ─── Pricing Switch (BLACK active pill — exactly like the screenshot) ─────────
+function PricingSwitch({ button1, button2, onSwitch, className = "", layoutId }) {
+  const [selected, setSelected] = useState("0");
+  const uniqueId = useId();
+  const switchLayoutId = layoutId || `switch-${uniqueId}`;
 
-export default function PricingPage() {
-  const [plans, setPlans] = useState([]);
-  const [activeTab, setActiveTab] = useState("user");
-  const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    getPlans()
-      .then(setPlans)
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
-
-  const userPlans = plans.filter((p) => p.type === "user");
-  const photographerPlans = plans.filter((p) => p.type === "photographer");
-  const displayed = activeTab === "user" ? userPlans : photographerPlans;
-
-  const handleSelect = (plan) => {
-    if (plan.price === 0) {
-      navigate("/signup");
-    } else {
-      navigate("/upgrade", { state: { selectedPlan: plan } });
-    }
+  const handleSwitch = (value) => {
+    setSelected(value);
+    onSwitch(value);
   };
 
   return (
-    <div className="min-h-screen bg-[#141414] text-[#fcf5eb] font-sans pt-12 pb-24 px-4 sm:px-6 flex flex-col items-center selection:bg-orange-500/30">
-      
-      {/* Header */}
-      <div className="max-w-3xl w-full text-center mt-12 mb-16">
-        <motion.h1 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight mb-4"
-          style={{ letterSpacing: "-0.03em" }}
-        >
-          MotionBook Packages
-        </motion.h1>
-      </div>
+    <div className={`relative z-10 w-full flex rounded-full bg-neutral-50 border border-gray-200 p-1 ${className}`}>
+      {[button1, button2].map((label, idx) => {
+        const val = String(idx);
+        const isActive = selected === val;
+        return (
+          <button
+            key={val}
+            onClick={() => handleSwitch(val)}
+            className={`relative z-10 w-full sm:h-14 h-10 rounded-full sm:px-6 px-3 py-1 font-medium transition-colors ${
+              isActive ? "text-white" : "text-gray-500 hover:text-black"
+            }`}
+          >
+            {isActive && (
+              <motion.span
+                layoutId={switchLayoutId}
+                className="absolute top-0 left-0 sm:h-14 h-10 w-full rounded-full border-4 shadow-sm shadow-black border-black bg-gradient-to-t from-neutral-900 via-neutral-800 to-neutral-900"
+                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+              />
+            )}
+            <span className="relative">{label}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 
-      {/* Tab Toggle */}
-      <div className="flex justify-center mb-12">
-        <div className="flex bg-[#222] p-1 rounded-full">
-          {[
-            { key: "user", label: "Personal" },
-            { key: "photographer", label: "Photographer" },
-          ].map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`px-8 py-3 rounded-full text-sm font-medium transition-all ${
-                activeTab === tab.key
-                  ? "bg-[#fcf5eb] text-[#141414]"
-                  : "text-gray-400 hover:text-gray-200"
-              }`}
+// ─── 3-Button Tier Switch (BLACK active pill) ─────────────────────────────────
+function TierSwitch({ options, onSwitch, layoutId }) {
+  const [selected, setSelected] = useState(0);
+  const uniqueId = useId();
+  const switchId = layoutId || `tier-${uniqueId}`;
+
+  const handleSwitch = (idx) => {
+    setSelected(idx);
+    onSwitch(idx);
+  };
+
+  return (
+    <div className="relative z-10 w-full flex rounded-full bg-neutral-50 border border-gray-200 p-1">
+      {options.map((label, idx) => {
+        const isActive = selected === idx;
+        return (
+          <button
+            key={idx}
+            onClick={() => handleSwitch(idx)}
+            className={`relative z-10 w-full h-10 sm:h-14 rounded-full px-2 py-1 font-medium text-sm transition-colors ${
+              isActive ? "text-white" : "text-gray-500 hover:text-black"
+            }`}
+          >
+            {isActive && (
+              <motion.span
+                layoutId={switchId}
+                className="absolute inset-0 rounded-full border-4 shadow-sm shadow-black border-black bg-gradient-to-t from-neutral-900 via-neutral-800 to-neutral-900"
+                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+              />
+            )}
+            <span className="relative">{label}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── Price Map ────────────────────────────────────────────────────────────────
+const PRICES = {
+  "0-0": { price: 999,   original: 1449,  label: "Spark",        tag: "1 Album · 100 Photos · Lifetime" },
+  "0-1": { price: 2499,  original: 3624,  label: "Memories",     tag: "2 Albums · 300 Photos · Lifetime" },
+  "0-2": { price: 4999,  original: 7249,  label: "Forever",      tag: "1 Wedding Album · 500 Photos · Family Sharing" },
+  "1-0": { price: 7999,  original: 11599, label: "Creator",      tag: "5 Client Albums · 50 GB Storage" },
+  "1-1": { price: 24999, original: 36249, label: "Pro Studio",   tag: "20 Albums · 250 GB Storage · Analytics" },
+  "1-2": { price: 79999, original: 115999,label: "Elite Studio", tag: "100 Albums · 1 TB Storage · White-label" },
+};
+
+const FEATURES = [
+  "AR Scan — works right from the browser",
+  "Lifetime access, no renewals",
+  "HD photo trigger printing guide",
+  "Cloudinary CDN video streaming",
+  "Mobile-first Web AR scanner",
+  "Family sharing (Forever & above)",
+  "Priority email support",
+];
+
+// ─── Main Page ────────────────────────────────────────────────────────────────
+export default function PricingPage() {
+  const [isPhotographer, setIsPhotographer] = useState(false);
+  const [tier, setTier] = useState(0);
+  const pricingRef = useRef(null);
+  const navigate = useNavigate();
+
+  const revealVariants = {
+    visible: (i) => ({
+      y: 0, opacity: 1, filter: "blur(0px)",
+      transition: { delay: i * 0.25, duration: 0.55, ease: "easeOut" },
+    }),
+    hidden: { filter: "blur(10px)", y: -20, opacity: 0 },
+  };
+
+  const timelineVariants = {
+    visible: (i) => ({
+      y: 0, opacity: 1, filter: "blur(0px)",
+      transition: { delay: i * 0.08, duration: 0.4 },
+    }),
+    hidden: { filter: "blur(10px)", y: -20, opacity: 0 },
+  };
+
+  const togglePlan = (val) => { setIsPhotographer(parseInt(val) === 1); setTier(0); };
+  const toggleTier  = (idx) => setTier(idx);
+
+  const key = `${isPhotographer ? 1 : 0}-${tier}`;
+  const { price, original, label, tag } = PRICES[key];
+  const discount = Math.round((1 - price / original) * 100);
+
+  const handlePurchase = () => {
+    navigate("/upgrade", {
+      state: { selectedPlan: { name: `MotionBook ${label}`, price } },
+    });
+  };
+
+  return (
+    <div
+      ref={pricingRef}
+      className="w-full min-h-screen font-sans relative overflow-hidden"
+      style={{ background: "#ffffff" }}
+    >
+      {/* Exact blue radial gradient from screenshot */}
+      <div
+        className="absolute inset-0 z-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(125% 125% at 50% 90%, #fff 40%, #2529f8 100%)",
+        }}
+      />
+
+      <div className="relative z-10 max-w-5xl mx-auto px-4 pt-36 pb-32">
+
+        {/* ── Hero ── */}
+        <div className="text-center mb-16">
+          <TimelineContent
+            as="div"
+            animationNum={0}
+            timelineRef={pricingRef}
+            customVariants={revealVariants}
+            className="inline-flex items-center justify-center gap-2 mb-4 text-blue-600 font-medium"
+          >
+            <Zap className="h-5 w-5 text-blue-500 fill-blue-500" />
+            Time to connect
+          </TimelineContent>
+
+          <h1 className="md:text-5xl sm:text-4xl text-3xl font-semibold text-gray-900 mb-4 leading-[120%]">
+            <VerticalCutReveal
+              splitBy="words"
+              staggerDuration={0.15}
+              staggerFrom="first"
+              reverse={true}
+              containerClassName="justify-center"
+              transition={{ type: "spring", stiffness: 250, damping: 40, delay: 0.4 }}
             >
-              {tab.label}
-            </button>
-          ))}
+              Let's get started
+            </VerticalCutReveal>
+          </h1>
+
+          <TimelineContent
+            as="p"
+            animationNum={1}
+            timelineRef={pricingRef}
+            customVariants={revealVariants}
+            className="text-xl text-gray-600"
+          >
+            Scan a photo. Relive the moment. Pay once, cherish forever.
+          </TimelineContent>
         </div>
-      </div>
 
-      {/* Plan Cards */}
-      <div className="w-full max-w-4xl flex flex-col gap-6">
-        {loading ? (
-          <div className="flex justify-center py-20">
-            <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
-          </div>
-        ) : (
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeTab}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="flex flex-col gap-6"
+        {/* ── Two-column body ── */}
+        <div className="grid sm:grid-cols-2 md:gap-12 gap-6 items-center">
+
+          {/* Left — Features */}
+          <div>
+            <TimelineContent
+              as="h3"
+              animationNum={2}
+              timelineRef={pricingRef}
+              customVariants={revealVariants}
+              className="text-3xl font-medium text-gray-900 mb-4"
             >
-              {displayed.map((plan) => (
-                <div
-                  key={plan._id}
-                  onClick={() => handleSelect(plan)}
-                  className="relative group bg-[#fcf5eb] rounded-[32px] p-8 sm:p-10 flex flex-col sm:flex-row items-center justify-between gap-8 cursor-pointer transition-transform hover:-translate-y-1 hover:shadow-2xl"
+              What's inside
+            </TimelineContent>
+
+            <div className="space-y-4">
+              {FEATURES.map((feature, index) => (
+                <TimelineContent
+                  key={index}
+                  as="div"
+                  animationNum={3 + index}
+                  timelineRef={pricingRef}
+                  customVariants={timelineVariants}
+                  className="flex items-center gap-3"
                 >
-                  {/* Left decorative accent */}
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-3 h-1/2 bg-[#ea3c12] rounded-r-xl" />
-
-                  {/* Left Side: Title & Badge */}
-                  <div className="flex-1 pl-4">
-                    <h3 className="text-[#141414] text-2xl sm:text-3xl font-bold tracking-tight mb-2">
-                      {plan.name}
-                    </h3>
-                    {plan.badge && (
-                      <span className="inline-block px-3 py-1 bg-gray-200 text-gray-800 text-xs font-semibold rounded-full uppercase tracking-wider mb-2">
-                        {plan.badge}
-                      </span>
-                    )}
-                    <p className="text-gray-600 text-sm max-w-sm mt-2 leading-relaxed">
-                      {plan.maxAlbums >= 100 ? "Unlimited" : plan.maxAlbums} Albums • {plan.maxPhotos >= 10000 ? "Unlimited" : plan.maxPhotos} Photos • {plan.validityDays >= 3650 ? "Lifetime Access" : `${plan.validityDays} Days Access`}
-                    </p>
+                  <div className="w-6 h-6 bg-blue-500 shadow-md shadow-blue-500/50 rounded-full flex items-center justify-center shrink-0">
+                    <CheckCheck className="h-4 w-4 text-white" />
                   </div>
-
-                  {/* Middle: Price */}
-                  <div className="flex-shrink-0 text-center sm:text-right flex items-baseline gap-1">
-                    <span className="text-[#141414] text-4xl sm:text-5xl font-extrabold tracking-tight">
-                      {formatPrice(plan.price)}
-                    </span>
-                  </div>
-
-                  {/* Right Side: Features */}
-                  <div className="flex-1 flex flex-col gap-2">
-                    {plan.features?.slice(0, 4).map((f, i) => (
-                      <div key={i} className="flex items-start gap-3 text-sm text-gray-700">
-                        <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mt-1.5 shrink-0" />
-                        <span>{f}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                  <span className="text-gray-700">{feature}</span>
+                </TimelineContent>
               ))}
-            </motion.div>
-          </AnimatePresence>
-        )}
-      </div>
+            </div>
+          </div>
 
+          {/* Right — Toggles + Price */}
+          <div className="space-y-8">
+
+            {/* Toggle 1 — Plan type */}
+            <TimelineContent
+              as="div"
+              animationNum={3}
+              timelineRef={pricingRef}
+              customVariants={revealVariants}
+            >
+              <h4 className="font-semibold text-gray-900 mb-1">Who is this for?</h4>
+              <p className="text-sm text-gray-600 mb-3">
+                Personal for families, Photographer for studios
+              </p>
+              <PricingSwitch
+                button1="👤 Personal"
+                button2="🎥 Photographer"
+                onSwitch={togglePlan}
+                layoutId="plan-switch"
+                className="grid grid-cols-2 w-full"
+              />
+            </TimelineContent>
+
+            {/* Toggle 2 — Tier (3 options) */}
+            <TimelineContent
+              as="div"
+              animationNum={4}
+              timelineRef={pricingRef}
+              customVariants={revealVariants}
+            >
+              <h4 className="font-semibold text-gray-900 mb-1">Plan size</h4>
+              <p className="text-sm text-gray-600 mb-3">
+                {isPhotographer
+                  ? "Creator · Pro Studio · Elite Studio"
+                  : "Spark · Memories · Forever"}
+              </p>
+              <TierSwitch
+                key={isPhotographer ? "photo" : "personal"}
+                options={isPhotographer
+                  ? ["Creator", "Pro Studio", "Elite"]
+                  : ["Spark", "Memories", "Forever"]}
+                onSwitch={toggleTier}
+                layoutId="tier-switch"
+              />
+            </TimelineContent>
+
+            {/* Price + Buy */}
+            <TimelineContent
+              as="div"
+              animationNum={5}
+              timelineRef={pricingRef}
+              customVariants={revealVariants}
+              className="grid grid-cols-2 items-center gap-2 px-2"
+            >
+              {/* Price block */}
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-5xl font-semibold text-gray-900 flex items-start">
+                  <span className="text-2xl mt-1">₹</span>
+                  <NumberFlow
+                    value={price}
+                    className="text-5xl font-semibold"
+                  />
+                </span>
+                <span className="text-xl text-gray-500 line-through ml-1">
+                  ₹<NumberFlow value={original} className="text-xl font-semibold line-through" />
+                </span>
+              </div>
+
+              {/* Blue purchase button — exact match */}
+              <button
+                onClick={handlePurchase}
+                className="text-white text-xl font-semibold h-10 sm:h-16 w-full rounded-full border-4 shadow-sm shadow-blue-600 border-blue-600 bg-gradient-to-t from-blue-600 via-blue-500 to-blue-600 hover:scale-105 transition-transform"
+              >
+                Purchase
+              </button>
+            </TimelineContent>
+
+            {/* Selected plan info pill */}
+            <motion.div
+              key={label}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-blue-50 border border-blue-100"
+            >
+              <Zap className="w-4 h-4 text-blue-500 fill-blue-500 shrink-0" />
+              <div>
+                <p className="text-gray-900 font-semibold text-sm">MotionBook {label}</p>
+                <p className="text-gray-500 text-xs">{tag} · {discount}% off</p>
+              </div>
+            </motion.div>
+
+          </div>
+        </div>
+
+      </div>
     </div>
   );
 }

@@ -2,7 +2,10 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { PlayCircle, LogOut, Upload, X, ImageIcon, Video, Check, AlertCircle, Loader2, Film, TrendingUp, HardDrive, Eye, DollarSign, Camera } from "lucide-react";
-import { uploadMotionbook, getMyMotionbooks, getMySubscription } from "../api";
+import { getMyMotionbooks, getMySubscription } from "../api";
+
+const MAX_IMAGE_MB = 10;
+const MAX_VIDEO_MB = 100;
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -32,8 +35,10 @@ export default function Dashboard() {
   const fetchData = async () => {
     try {
       const [mediaRes, subRes] = await Promise.all([getMyMotionbooks(), getMySubscription()]);
-      setMediaItems(mediaRes.data || []);
-      setSub(subRes.data);
+      // Backend returns array directly for motionbooks
+      setMediaItems(Array.isArray(mediaRes) ? mediaRes : (mediaRes.data || []));
+      // Backend returns { subscription, plan, usage } shape
+      setSub(subRes);
     } catch (err) {
       console.error(err);
     }
@@ -45,27 +50,81 @@ export default function Dashboard() {
     navigate("/");
   };
 
+  const [uploadProgress, setUploadProgress] = useState(0);
+
   const handleUpload = async (e) => {
     e.preventDefault();
     if (!imageFile || !videoFile || !title) {
       setError("Please provide a title, image, and video.");
       return;
     }
+
+    // Client-side file size validation
+    if (imageFile.size > MAX_IMAGE_MB * 1024 * 1024) {
+      setError(`Image must be smaller than ${MAX_IMAGE_MB} MB.`);
+      return;
+    }
+    if (videoFile.size > MAX_VIDEO_MB * 1024 * 1024) {
+      setError(`Video must be smaller than ${MAX_VIDEO_MB} MB.`);
+      return;
+    }
+
     setUploading(true);
     setError("");
     setSuccess(false);
+    setUploadProgress(0);
+
     try {
+      const token = localStorage.getItem("token");
+      const BASE = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api/auth').replace('/api/auth', '');
       const formData = new FormData();
       formData.append("title", title);
       formData.append("image", imageFile);
       formData.append("video", videoFile);
-      await uploadMotionbook(formData);
+
+      await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", `${BASE}/api/motionbook/upload`);
+        xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            setUploadProgress(Math.round((event.loaded / event.total) * 100));
+          }
+        };
+
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve(JSON.parse(xhr.responseText));
+          } else {
+            let message = "Upload failed.";
+            try {
+              const body = JSON.parse(xhr.responseText);
+              if (body.error === 'NO_SUBSCRIPTION') message = "No active subscription. Please upgrade your plan.";
+              else if (body.error === 'SUBSCRIPTION_EXPIRED') message = "Your subscription has expired. Please renew.";
+              else if (body.error === 'PHOTO_LIMIT_REACHED') message = body.message || "Photo limit reached. Please upgrade.";
+              else if (body.error === 'STORAGE_LIMIT_REACHED') message = body.message || "Storage full. Please upgrade.";
+              else if (body.error === 'VIDEO_SIZE_EXCEEDED') message = body.message || "Video file too large for your plan.";
+              else message = body.message || body.error || "Upload failed.";
+            } catch {}
+            reject(new Error(message));
+          }
+        };
+
+        xhr.onerror = () => reject(new Error("Network error. Please check your connection and try again."));
+        xhr.ontimeout = () => reject(new Error("Upload timed out. The server may be waking up — please try again in a moment."));
+        xhr.timeout = 120000; // 2 minutes
+
+        xhr.send(formData);
+      });
+
       setSuccess(true);
-      setTitle(""); setImageFile(null); setVideoFile(null);
+      setTitle(""); setImageFile(null); setVideoFile(null); setUploadProgress(0);
       fetchData();
       setTimeout(() => { setShowUploadModal(false); setSuccess(false); }, 1500);
     } catch (err) {
       setError(err.message || "Upload failed.");
+      setUploadProgress(0);
     } finally {
       setUploading(false);
     }
@@ -85,10 +144,15 @@ export default function Dashboard() {
 
   if (!user) return null;
 
-  const isPremium = sub?.planType === "premium";
+  const isPremium = sub?.plan?.type === "premium" || sub?.plan?.type === "professional" || sub?.plan?.type === "enterprise";
   const usedStorage = mediaItems.length;
   const totalStorage = isPremium ? 100 : 3;
   const storagePercent = (usedStorage / totalStorage) * 100;
+
+  // Real storage usage from API
+  const storageUsedGB = sub?.usage?.storageUsedGB || "0.000";
+  const storageTotalGB = sub?.usage?.storageTotalGB || (isPremium ? "10.0" : "1.0");
+  const storageUsedPercent = sub?.usage?.storagePercent || storagePercent;
 
   return (
     <div className="min-h-screen bg-white text-gray-900 pt-24 pb-32 px-4 sm:px-6 font-sans">
@@ -163,16 +227,16 @@ export default function Dashboard() {
                 {!isPremium && <Link to="/pricing" className="text-xs text-blue-500 hover:underline font-medium">Upgrade</Link>}
               </div>
               <div className="flex items-end gap-2 mb-2">
-                <span className="text-3xl font-bold tracking-tight text-gray-900">{usedStorage}</span>
-                <span className="text-gray-400 mb-1">/ {totalStorage}</span>
+                <span className="text-3xl font-bold tracking-tight text-gray-900">{storageUsedGB} GB</span>
+                <span className="text-gray-400 mb-1">/ {storageTotalGB} GB</span>
               </div>
             </div>
             <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden mt-4">
               <motion.div 
                 initial={{ width: 0 }}
-                animate={{ width: `${storagePercent}%` }}
+                animate={{ width: `${Math.min(100, storageUsedPercent)}%` }}
                 transition={{ duration: 1, ease: "easeOut" }}
-                className={`h-full rounded-full ${storagePercent > 90 ? 'bg-red-500' : 'bg-blue-500'}`}
+                className={`h-full rounded-full ${storageUsedPercent > 90 ? 'bg-red-500' : 'bg-blue-500'}`}
               />
             </div>
           </motion.div>
@@ -321,9 +385,33 @@ export default function Dashboard() {
                   </div>
                 </div>
 
+                {uploading && uploadProgress > 0 && (
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-xs text-gray-500 font-medium">
+                      <span>Uploading to cloud...</span>
+                      <span>{uploadProgress}%</span>
+                    </div>
+                    <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${uploadProgress}%` }}
+                        transition={{ duration: 0.3 }}
+                        className="h-full bg-blue-500 rounded-full"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {uploading && uploadProgress === 0 && (
+                  <div className="flex items-center gap-2 text-blue-600 text-sm bg-blue-50 p-3 rounded-xl border border-blue-200">
+                    <Loader2 className="w-4 h-4 shrink-0 animate-spin" />
+                    <p>Connecting to server... (may take a moment on first upload)</p>
+                  </div>
+                )}
+
                 {error && (
-                  <div className="flex items-center gap-2 text-red-600 text-sm bg-red-50 p-4 rounded-xl border border-red-200">
-                    <AlertCircle className="w-4 h-4 shrink-0" />
+                  <div className="flex items-start gap-2 text-red-600 text-sm bg-red-50 p-4 rounded-xl border border-red-200">
+                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                     <p>{error}</p>
                   </div>
                 )}
@@ -341,7 +429,7 @@ export default function Dashboard() {
                   className="w-full py-4 bg-gray-900 text-white hover:bg-gray-800 font-bold rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2 text-sm"
                 >
                   {uploading ? (
-                    <><Loader2 className="w-4 h-4 animate-spin" /> Uploading...</>
+                    <><Loader2 className="w-4 h-4 animate-spin" /> {uploadProgress > 0 ? `Uploading ${uploadProgress}%...` : "Connecting..."}</>
                   ) : (
                     "Upload Album"
                   )}

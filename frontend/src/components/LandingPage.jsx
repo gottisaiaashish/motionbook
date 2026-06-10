@@ -258,43 +258,71 @@ export default function LandingPage() {
             <h2 className="text-3xl md:text-5xl font-bold mb-4">Simple Pricing</h2>
             <p className="text-gray-400">Start for free, upgrade when you need more power.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {/* Free Tier */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {/* Spark Tier */}
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="p-8 rounded-3xl bg-white/5 border border-white/10"
+              className="p-8 rounded-3xl bg-white/5 border border-white/10 flex flex-col"
             >
-              <h3 className="text-2xl font-bold mb-2">Starter</h3>
-              <div className="text-4xl font-extrabold mb-6">$0<span className="text-lg text-gray-500 font-normal">/mo</span></div>
-              <ul className="space-y-4 mb-8 text-gray-300">
-                <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-indigo-400" /> Up to 3 projects</li>
-                <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-indigo-400" /> Basic animations</li>
-                <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-indigo-400" /> Community support</li>
+              <h3 className="text-2xl font-bold mb-2">MotionBook Spark</h3>
+              <div className="text-4xl font-extrabold mb-6">₹999<span className="text-sm text-gray-500 font-normal"> / one-time</span></div>
+              <ul className="space-y-4 mb-8 text-gray-300 flex-1">
+                <li>1 Album</li>
+                <li>100 Photos</li>
+                <li>5 GB Storage</li>
+                <li>AR Scan Enabled</li>
+                <li>10 Years Access</li>
               </ul>
-              <Link to="/signup" className="block text-center w-full py-4 rounded-xl bg-white/10 hover:bg-white/20 font-semibold transition-colors">
-                Start Free
+              <Link to="/signup" className="block text-center w-full py-4 rounded-xl bg-white/10 hover:bg-white/20 font-semibold transition-colors mt-auto">
+                Get Started
               </Link>
             </motion.div>
 
-            {/* Pro Tier */}
+            {/* Memories Tier */}
             <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="p-8 rounded-3xl bg-gradient-to-b from-indigo-900/50 to-black border border-indigo-500/30 relative overflow-hidden"
+              transition={{ delay: 0.1 }}
+              className="p-8 rounded-3xl bg-gradient-to-b from-indigo-900/50 to-black border border-indigo-500/30 relative overflow-hidden flex flex-col shadow-2xl shadow-indigo-500/10"
             >
-              <div className="absolute top-0 right-0 bg-indigo-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">POPULAR</div>
-              <h3 className="text-2xl font-bold mb-2 text-indigo-100">Pro Creator</h3>
-              <div className="text-4xl font-extrabold mb-6">$12<span className="text-lg text-indigo-300 font-normal">/mo</span></div>
-              <ul className="space-y-4 mb-8 text-indigo-100/80">
-                <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-indigo-400" /> Unlimited projects</li>
-                <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-indigo-400" /> Advanced 3D animations</li>
-                <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-indigo-400" /> Priority support & 4K Export</li>
+              <div className="absolute top-0 right-0 bg-indigo-500 text-white text-xs font-bold px-4 py-1.5 rounded-bl-lg">POPULAR</div>
+              <h3 className="text-2xl font-bold mb-2 text-indigo-100">MotionBook Memories</h3>
+              <div className="text-4xl font-extrabold mb-6">₹2,499<span className="text-sm text-indigo-300 font-normal"> / one-time</span></div>
+              <ul className="space-y-4 mb-8 text-indigo-100/80 flex-1">
+                <li>2 Albums</li>
+                <li>300 Photos</li>
+                <li>15 GB Storage</li>
+                <li>AR Scan Enabled</li>
+                <li>10 Years Access</li>
               </ul>
-              <Link to="/signup" className="block text-center w-full py-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 font-semibold transition-colors shadow-lg shadow-indigo-500/25">
-                Upgrade to Pro
+              <Link to="/signup" className="block text-center w-full py-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 font-semibold transition-colors shadow-lg shadow-indigo-500/25 mt-auto">
+                Select Plan
+              </Link>
+            </motion.div>
+
+            {/* Forever Tier */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              className="p-8 rounded-3xl bg-white/5 border border-white/10 flex flex-col"
+            >
+              <h3 className="text-2xl font-bold mb-2">MotionBook Forever</h3>
+              <div className="text-4xl font-extrabold mb-6">₹4,999<span className="text-sm text-gray-500 font-normal"> / one-time</span></div>
+              <ul className="space-y-4 mb-8 text-gray-300 flex-1">
+                <li>1 Wedding Album</li>
+                <li>500 Photos</li>
+                <li>50 GB Storage</li>
+                <li>Family Sharing</li>
+                <li>AR Scan Enabled</li>
+                <li>10 Years Access</li>
+              </ul>
+              <Link to="/signup" className="block text-center w-full py-4 rounded-xl bg-white/10 hover:bg-white/20 font-semibold transition-colors mt-auto">
+                Get Started
               </Link>
             </motion.div>
           </div>

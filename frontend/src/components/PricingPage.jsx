@@ -2,7 +2,7 @@ import { useState, useId, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import NumberFlow from "@number-flow/react";
-import { CheckCheck, Zap } from "lucide-react";
+import { CheckCheck, Zap, Loader2 } from "lucide-react";
 import { VerticalCutReveal } from "./ui/VerticalCutReveal";
 import { TimelineContent } from "./ui/TimelineContent";
 import { getPlans, createRazorpayOrder, verifyRazorpayPayment } from "../api";
@@ -256,7 +256,7 @@ export default function PricingPage() {
             alert("Payment verification failed."); 
           }
         },
-        prefill: { name: "User", email: "user@example.com" },
+        prefill: { name: "User", email: "user@motionbook.com", contact: "9999999999" },
         theme: { color: "#2563eb" },
       };
       
@@ -446,9 +446,10 @@ export default function PricingPage() {
               {/* Blue purchase button — exact match */}
               <button
                 onClick={handlePurchase}
-                className="text-white text-xl font-semibold h-10 sm:h-16 w-full rounded-full border-4 shadow-sm shadow-blue-600 border-blue-600 bg-gradient-to-t from-blue-600 via-blue-500 to-blue-600 hover:scale-105 transition-transform"
+                disabled={processing}
+                className="text-white text-xl font-semibold h-10 sm:h-16 w-full rounded-full border-4 shadow-sm shadow-blue-600 border-blue-600 bg-gradient-to-t from-blue-600 via-blue-500 to-blue-600 hover:scale-105 transition-transform disabled:opacity-75 disabled:scale-100 flex items-center justify-center gap-2"
               >
-                Purchase
+                {processing ? <><Loader2 className="w-5 h-5 animate-spin" /> Processing...</> : "Purchase"}
               </button>
             </TimelineContent>
 

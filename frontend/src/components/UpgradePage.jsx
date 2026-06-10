@@ -98,7 +98,7 @@ export default function UpgradePage() {
           email: user.email || "",
         },
         theme: {
-          color: "#f97316", // Orange-500
+          color: "#4f46e5", // indigo-600
         },
       };
 
@@ -124,7 +124,7 @@ export default function UpgradePage() {
           <ChevronLeft className="w-5 h-5" />
         </button>
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center">
+          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
             <PlayCircle className="w-4 h-4 text-white" />
           </div>
           <span className="text-white font-black">Upgrade Plan</span>
@@ -158,33 +158,50 @@ export default function UpgradePage() {
                 <div className="inline-flex p-1 rounded-2xl" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
                   {[{ key: "user", label: "👤 Personal" }, { key: "photographer", label: "🎥 Photographer" }].map((t) => (
                     <button key={t.key} onClick={() => setActiveTab(t.key)}
-                      className={`px-5 py-2 rounded-xl text-sm font-semibold transition-all ${activeTab === t.key ? "bg-orange-500 text-white" : "text-gray-400 hover:text-white"}`}>
+                      className={`px-5 py-2 rounded-xl text-sm font-semibold transition-all ${activeTab === t.key ? "bg-indigo-500 text-white" : "text-gray-400 hover:text-white"}`}>
                       {t.label}
                     </button>
                   ))}
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {(activeTab === "user" ? userPlans : photographerPlans).map((plan) => (
-                  <motion.div key={plan._id} whileHover={{ y: -3 }}
-                    onClick={() => handleSelectPlan(plan)}
-                    className={`cursor-pointer p-5 rounded-2xl border transition-all ${plan.badge === "Popular" || plan.badge === "Best Value" ? "border-orange-500/50 bg-orange-500/5" : "border-white/10 bg-white/3 hover:border-orange-500/30"}`}>
-                    <div className="text-2xl mb-2">{plan.icon}</div>
-                    <div className="text-white font-bold mb-1">{plan.name}</div>
-                    <div className="text-orange-400 text-2xl font-black mb-3">₹{plan.price.toLocaleString("en-IN")}</div>
-                    <ul className="space-y-1.5">
-                      {plan.features?.slice(0, 4).map((f, i) => (
-                        <li key={i} className="flex items-center gap-2 text-xs text-gray-400">
-                          <Check className="w-3 h-3 text-orange-400 flex-shrink-0" />{f}
-                        </li>
-                      ))}
-                    </ul>
-                    <button className="mt-4 w-full py-2 rounded-xl bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 text-sm font-semibold border border-orange-500/30 transition-all">
-                      Select Plan
-                    </button>
-                  </motion.div>
-                ))}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                {(activeTab === "user" ? userPlans : photographerPlans).map((plan) => {
+                  const isPopular = plan.badge === "Popular" || plan.badge === "Best Value" || plan.badge === "Enterprise";
+                  return (
+                    <motion.div key={plan._id} whileHover={{ y: -5 }}
+                      onClick={() => handleSelectPlan(plan)}
+                      className={`cursor-pointer ${isPopular ? "p-8 rounded-3xl bg-gradient-to-b from-indigo-900/50 to-black border border-indigo-500/30 relative overflow-hidden flex flex-col shadow-2xl shadow-indigo-500/10" : "p-8 rounded-3xl bg-white/5 border border-white/10 flex flex-col relative overflow-hidden"}`}>
+                      
+                      {plan.badge && (
+                        <div className={`absolute top-0 right-0 text-white text-xs font-bold px-4 py-1.5 rounded-bl-lg ${isPopular ? "bg-indigo-500" : "bg-gray-600"}`}>
+                          {plan.badge.toUpperCase()}
+                        </div>
+                      )}
+                      
+                      <h3 className={`text-2xl font-bold mb-2 flex items-center gap-2 ${isPopular ? "text-indigo-100" : ""}`}>
+                        <span className="text-2xl">{plan.icon}</span> {plan.name}
+                      </h3>
+                      
+                      <div className="text-4xl font-extrabold mb-6">
+                        ₹{plan.price.toLocaleString("en-IN")}
+                        <span className={`text-sm font-normal ${isPopular ? "text-indigo-300" : "text-gray-500"}`}> / one-time</span>
+                      </div>
+                      
+                      <ul className={`space-y-4 mb-8 flex-1 ${isPopular ? "text-indigo-100/80" : "text-gray-300"}`}>
+                        {plan.features?.map((f, i) => (
+                          <li key={i} className="flex items-center gap-2 text-sm">
+                            <Check className={`w-4 h-4 flex-shrink-0 ${isPopular ? "text-indigo-400" : "text-gray-400"}`} />{f}
+                          </li>
+                        ))}
+                      </ul>
+                      
+                      <button className={`block text-center w-full py-4 rounded-xl font-semibold transition-colors mt-auto ${isPopular ? "bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-500/25" : "bg-white/10 hover:bg-white/20"}`}>
+                        Select Plan
+                      </button>
+                    </motion.div>
+                  );
+                })}
               </div>
             </motion.div>
           )}
@@ -193,19 +210,23 @@ export default function UpgradePage() {
           {step === "payment" && selected && !done && (
             <motion.div key="payment" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}
               className="max-w-md mx-auto">
-              <div className="p-6 rounded-2xl mb-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                <div className="text-2xl mb-2">{selected.icon}</div>
-                <div className="text-white font-bold text-xl mb-1">{selected.name}</div>
-                <div className="text-orange-400 text-3xl font-black mb-4">₹{selected.price?.toLocaleString("en-IN")}</div>
-                <ul className="space-y-2 mb-6">
+              <div className="p-8 rounded-3xl mb-4 bg-gradient-to-b from-indigo-900/30 to-black border border-indigo-500/30 shadow-2xl shadow-indigo-500/10">
+                <h3 className="text-2xl font-bold mb-2 flex items-center gap-2 text-indigo-100">
+                  <span className="text-2xl">{selected.icon}</span> {selected.name}
+                </h3>
+                <div className="text-4xl font-extrabold mb-6">
+                  ₹{selected.price?.toLocaleString("en-IN")}
+                  <span className="text-sm text-indigo-300 font-normal"> / one-time</span>
+                </div>
+                <ul className="space-y-4 mb-6 text-indigo-100/80">
                   {selected.features?.map((f, i) => (
-                    <li key={i} className="flex items-center gap-2 text-sm text-gray-300">
-                      <Check className="w-4 h-4 text-orange-400 flex-shrink-0" />{f}
+                    <li key={i} className="flex items-center gap-2 text-sm">
+                      <Check className="w-4 h-4 text-indigo-400 flex-shrink-0" />{f}
                     </li>
                   ))}
                 </ul>
-                <div className="p-3 rounded-xl text-xs text-gray-400 flex items-center gap-2" style={{ background: "rgba(249,115,22,0.06)", border: "1px solid rgba(249,115,22,0.15)" }}>
-                  <Zap className="w-4 h-4 text-orange-400" />
+                <div className="p-3 rounded-xl text-xs text-indigo-200 flex items-center gap-2" style={{ background: "rgba(79,70,229,0.1)", border: "1px solid rgba(79,70,229,0.3)" }}>
+                  <Zap className="w-4 h-4 text-indigo-400" />
                   Instant Activation via Razorpay
                 </div>
               </div>
@@ -213,7 +234,7 @@ export default function UpgradePage() {
               {error && <div className="text-red-400 text-sm mb-3 p-3 rounded-xl bg-red-500/10 border border-red-500/20">{error}</div>}
               
               <button onClick={handlePayment} disabled={loading}
-                className="w-full py-3.5 bg-orange-500 hover:bg-orange-400 text-white font-bold rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40">
+                className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/25">
                 {loading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><CreditCard className="w-5 h-5" />Pay with Razorpay</>}
               </button>
               <button onClick={() => setStep("plans")} className="mt-3 w-full py-2.5 text-gray-400 hover:text-white text-sm transition-colors">
@@ -232,7 +253,7 @@ export default function UpgradePage() {
               <h2 className="text-white font-black text-2xl mb-3">Payment Successful! 🎉</h2>
               <p className="text-gray-400 mb-8">Your {selected?.name} has been instantly activated. You can now continue using Motionbook.</p>
               <Link to="/dashboard"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-400 text-white font-bold rounded-xl transition-colors">
+                className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-colors">
                 Go to Dashboard
               </Link>
             </motion.div>

@@ -38,7 +38,7 @@ export default function LandingPage() {
     <div className="min-h-screen bg-white text-gray-900 selection:bg-blue-500/20 font-sans overflow-x-hidden">
       
       {/* 1. Hero Section */}
-      <section className="relative pt-40 pb-20 overflow-hidden flex flex-col items-center">
+      <section className="relative pt-44 pb-24 overflow-hidden flex flex-col items-center min-h-[85vh] justify-center">
         {/* Blue Gradient Background — same as pricing */}
         <div
           className="absolute inset-0 z-0 pointer-events-none"
@@ -52,7 +52,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
-            className="text-6xl md:text-8xl font-extrabold tracking-tighter mb-6 leading-[1.05] text-gray-900 font-['Playfair_Display']"
+            className="text-[clamp(3rem,10vw,6rem)] font-extrabold tracking-tighter mb-6 leading-[1.05] text-gray-900 font-['Playfair_Display']"
           >
             Scan a Photo. <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-500 italic font-['Playfair_Display']">
@@ -64,7 +64,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-            className="max-w-2xl mx-auto text-xl text-gray-500 mb-10 leading-relaxed font-light"
+            className="max-w-2xl mx-auto text-lg md:text-xl text-gray-500 mb-10 leading-relaxed font-light px-2"
           >
             MotionBook transforms ordinary photos into living, breathing memories using advanced AI and Augmented Reality.
           </motion.p>

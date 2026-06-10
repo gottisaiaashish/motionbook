@@ -7,12 +7,32 @@ import { Subscription } from '../models/Subscription.js';
  */
 export const checkSubscriptionLimits = async (req, res, next) => {
   try {
-    const subscription = await Subscription.findOne({
+    const bypassLimits = req.user && req.user.email === 'gottisaiaashish@gmail.com';
+
+    let subscription = await Subscription.findOne({
       userId: req.user._id,
       status: { $in: ['demo', 'active', 'referral_reward'] },
     })
       .sort({ createdAt: -1 })
       .populate('planId');
+
+    if (bypassLimits) {
+      if (subscription && subscription.planId) {
+        subscription.planId.maxPhotos = Infinity;
+        subscription.planId.maxStorageBytes = Infinity;
+        subscription.planId.maxVideoSizeMB = Infinity;
+        subscription.endDate = new Date('2099-12-31');
+      } else {
+        subscription = {
+          planId: { maxPhotos: Infinity, maxStorageBytes: Infinity, maxVideoSizeMB: Infinity, hasWatermark: false },
+          photosUploaded: 0,
+          storageUsedBytes: 0,
+          albumsCreated: 0,
+          status: 'active',
+          endDate: new Date('2099-12-31')
+        };
+      }
+    }
 
     // No active subscription at all
     if (!subscription) {

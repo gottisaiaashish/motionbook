@@ -80,6 +80,8 @@ export default function ScanPage() {
       clearTimeout(scanTimeout);
     };
   }, [scanning, matchedVideo]);
+
+  useEffect(() => {
     fetchMedia();
   }, []);
 

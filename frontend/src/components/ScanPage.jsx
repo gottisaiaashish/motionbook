@@ -1,231 +1,99 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { X, PlayCircle, Maximize, AlertCircle, ScanLine } from "lucide-react";
+import { X } from "lucide-react";
 import { getMyMotionbooks } from "../api";
 
 export default function ScanPage() {
-  const [mediaItems, setMediaItems] = useState([]);
-  const [scanning, setScanning] = useState(true);
-  const [matchedVideo, setMatchedVideo] = useState(null);
-  const [detectionState, setDetectionState] = useState("searching"); // searching, detecting, locked
-  
+  const [videoUrl, setVideoUrl] = useState("");
   const videoRef = useRef(null);
 
-  // Real AI detection for AR effect
   useEffect(() => {
-    if (!scanning || matchedVideo) return;
-    
-    let isActive = true;
-    let scanTimeout;
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-
-    const performScan = async () => {
-      if (!isActive) return;
-      
-      const video = videoRef.current;
-      if (!video || video.readyState !== 4) {
-        scanTimeout = setTimeout(performScan, 500);
-        return;
-      }
-      
+    // Fetch the user's motionbook to get the video URL
+    const fetchMedia = async () => {
       try {
-        // Draw frame to canvas
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        
-        // Downscale to save bandwidth (max width 400px)
-        const targetWidth = 400;
-        const scale = targetWidth / canvas.width;
-        const tempCanvas = document.createElement("canvas");
-        tempCanvas.width = targetWidth;
-        tempCanvas.height = canvas.height * scale;
-        const tempCtx = tempCanvas.getContext("2d");
-        tempCtx.drawImage(canvas, 0, 0, tempCanvas.width, tempCanvas.height);
-        
-        const imageDataUrl = tempCanvas.toDataURL("image/jpeg", 0.6);
-
-        // Import scanImage from api dynamically or if imported at top
-        const { scanImage } = await import('../api.js');
-        const result = await scanImage(imageDataUrl);
-        
-        if (result.match && isActive) {
-          setDetectionState("detecting");
-          setTimeout(() => {
-            if (!isActive) return;
-            setDetectionState("locked");
-            setTimeout(() => {
-              if (!isActive) return;
-              setMatchedVideo(result.videoUrl);
-              setScanning(false);
-            }, 800);
-          }, 300);
-          return; // Stop scanning once matched
+        const res = await getMyMotionbooks();
+        if (res.data && res.data.length > 0) {
+          setVideoUrl(res.data[0].videoUrl);
         }
       } catch (err) {
-        console.error("Scan error", err);
-      }
-      
-      if (isActive) {
-        scanTimeout = setTimeout(performScan, 1000); // 1 scan per second
+        console.error(err);
       }
     };
-
-    scanTimeout = setTimeout(performScan, 1000);
-
-    return () => {
-      isActive = false;
-      clearTimeout(scanTimeout);
-    };
-  }, [scanning, matchedVideo]);
-
-  useEffect(() => {
     fetchMedia();
   }, []);
 
-  const fetchMedia = async () => {
-    try {
-      const res = await getMyMotionbooks();
-      setMediaItems(res.data || []);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  // Real Camera Feed using native WebRTC
+  // When A-Frame target is found, play the video
   useEffect(() => {
-    let stream = null;
-    const startCamera = async () => {
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
-      } catch (err) {
-        console.error("Camera access denied:", err);
+    if (!videoUrl) return;
+
+    // A-Frame sometimes takes a moment to mount the target entity
+    const checkTarget = setInterval(() => {
+      const target = document.querySelector('#target');
+      if (target) {
+        clearInterval(checkTarget);
+        
+        target.addEventListener('targetFound', () => {
+          console.log("Target found");
+          const vid = document.querySelector('#ar-video');
+          if (vid) vid.play();
+        });
+        
+        target.addEventListener('targetLost', () => {
+          console.log("Target lost");
+          const vid = document.querySelector('#ar-video');
+          if (vid) vid.pause();
+        });
       }
-    };
-    startCamera();
-    return () => {
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-      }
-    };
-  }, []);
+    }, 500);
+
+    return () => clearInterval(checkTarget);
+  }, [videoUrl]);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black overflow-hidden flex flex-col font-sans">
+    <div className="fixed inset-0 z-50 bg-black overflow-hidden font-sans">
       
-      {/* Top Navbar overlay */}
-      <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between p-6 bg-gradient-to-b from-black/80 to-transparent pointer-events-none">
-        <Link to="/" className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center pointer-events-auto transition-transform hover:scale-110 border border-white/20">
+      {/* Top Navbar */}
+      <div className="absolute top-0 left-0 right-0 z-[100] flex items-center justify-between p-6 bg-gradient-to-b from-black/80 to-transparent pointer-events-none">
+        <Link to="/" onClick={() => window.location.reload()} className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center pointer-events-auto transition-transform hover:scale-110 border border-white/20">
           <X className="w-5 h-5 text-white" />
         </Link>
-        <div className="flex items-center gap-2 bg-black/50 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
-          <ScanLine className={`w-4 h-4 ${detectionState === 'locked' ? 'text-green-500' : 'text-[#FF6B00] animate-pulse'}`} />
-          <span className="text-xs font-bold tracking-widest uppercase text-white">
-            {detectionState === 'searching' ? 'Searching...' : detectionState === 'detecting' ? 'Analyzing...' : 'Target Locked'}
-          </span>
+        <div className="px-4 py-2 bg-black/50 backdrop-blur-md rounded-full text-white text-xs font-bold uppercase tracking-widest border border-white/10">
+          AR Mode Active
         </div>
       </div>
 
-      {/* Main Camera View */}
-      <div className="relative flex-1 w-full h-full bg-black">
-        {/* The actual camera feed */}
-        <video 
-          ref={videoRef} 
-          autoPlay 
-          playsInline 
-          muted 
-          className="absolute inset-0 w-full h-full object-cover opacity-70"
-        />
+      {/* A-Frame Scene */}
+      {videoUrl ? (
+        <a-scene 
+          mindar-image="imageTargetSrc: /targets.mind; autoStart: true; maxTrack: 1" 
+          color-space="sRGB" 
+          renderer="colorManagement: true, physicallyCorrectLights" 
+          vr-mode-ui="enabled: false" 
+          device-orientation-permission-ui="enabled: false"
+        >
+          <a-assets>
+            <video 
+              id="ar-video" 
+              src={videoUrl} 
+              loop 
+              crossOrigin="anonymous" 
+              playsInline 
+              muted 
+            ></video>
+          </a-assets>
 
-        {/* AI Detection UI Overlay */}
-        <AnimatePresence>
-          {scanning && (
-            <motion.div 
-              exit={{ opacity: 0, scale: 1.1 }}
-              transition={{ duration: 0.5 }}
-              className="absolute inset-0 flex items-center justify-center pointer-events-none"
-            >
-              {/* Detection Box */}
-              <motion.div 
-                animate={{ 
-                  scale: detectionState === "searching" ? [0.98, 1.02, 0.98] : detectionState === "detecting" ? [1, 1.05, 1] : 1,
-                  borderColor: detectionState === "locked" ? "#22c55e" : "#FF6B00",
-                  boxShadow: detectionState === "locked" ? "0 0 40px rgba(34,197,94,0.4)" : "0 0 20px rgba(255,107,0,0)"
-                }}
-                transition={{ duration: 2, repeat: detectionState !== "locked" ? Infinity : 0 }}
-                className="w-[85vw] max-w-md aspect-[3/4] border-2 relative rounded-3xl overflow-hidden transition-colors duration-300 bg-white/[0.01]"
-              >
-                {/* Corner Accents */}
-                <div className={`absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 rounded-tl-3xl transition-colors duration-300 ${detectionState === 'locked' ? 'border-green-500' : 'border-[#FF6B00]'}`} />
-                <div className={`absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 rounded-tr-3xl transition-colors duration-300 ${detectionState === 'locked' ? 'border-green-500' : 'border-[#FF6B00]'}`} />
-                <div className={`absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 rounded-bl-3xl transition-colors duration-300 ${detectionState === 'locked' ? 'border-green-500' : 'border-[#FF6B00]'}`} />
-                <div className={`absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 rounded-br-3xl transition-colors duration-300 ${detectionState === 'locked' ? 'border-green-500' : 'border-[#FF6B00]'}`} />
-
-                {/* Scanning Laser Line */}
-                {detectionState !== "locked" && (
-                  <motion.div 
-                    animate={{ y: ["0%", "400%", "0%"] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                    className="absolute left-0 right-0 h-1/4 bg-gradient-to-b from-transparent via-[#FF6B00]/20 to-transparent border-b border-[#FF6B00]/50"
-                  />
-                )}
-
-                {/* Reticle Crosshair */}
-                <div className="absolute inset-0 flex items-center justify-center opacity-30">
-                  <Maximize className={`w-12 h-12 ${detectionState === 'locked' ? 'text-green-500' : 'text-[#FF6B00]'}`} strokeWidth={1} />
-                </div>
-              </motion.div>
-              
-              <div className="absolute bottom-20 left-0 right-0 text-center">
-                <p className="text-white/70 text-sm font-medium tracking-wide">
-                  {detectionState === 'searching' && "Point camera at your physical photo"}
-                  {detectionState === 'detecting' && "Hold still, analyzing image..."}
-                  {detectionState === 'locked' && "Photo recognized. Loading memory..."}
-                </p>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Video Player overlay when matched (AR Mode) */}
-        <AnimatePresence>
-          {matchedVideo && (
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ type: "spring", stiffness: 200, damping: 20 }}
-              className="absolute inset-0 z-30 flex flex-col items-center justify-center pointer-events-none p-4"
-            >
-              {/* This mimics the scanner box size but plays the video inside it */}
-              <div className="w-[85vw] max-w-md aspect-[3/4] rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(255,107,0,0.5)] border border-white/30 relative pointer-events-auto bg-black/50 backdrop-blur-sm">
-                <video 
-                  src={matchedVideo} 
-                  autoPlay 
-                  loop
-                  playsInline 
-                  muted // Required for iOS auto-play
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
-                <button 
-                  onClick={() => { setMatchedVideo(null); setScanning(true); setDetectionState("searching"); }}
-                  className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center border border-white/20 text-white hover:bg-white/20 transition-colors z-40"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-              <div className="absolute bottom-20 left-0 right-0 text-center text-white/90 drop-shadow-lg font-medium">
-                Tap the X to scan another photo
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-      </div>
+          <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+          
+          <a-entity id="target" mindar-image-target="targetIndex: 0">
+            {/* The video is mapped to the photo area. 
+                Adjust width and height based on the physical photo's aspect ratio.
+                Assuming standard 4:3 photo in portrait mode => width: 1, height: 1.33 */}
+            <a-video src="#ar-video" position="0 0 0" height="1.33" width="1" rotation="0 0 0"></a-video>
+          </a-entity>
+        </a-scene>
+      ) : (
+        <div className="flex items-center justify-center h-full text-white">Loading AR Experience...</div>
+      )}
     </div>
   );
 }

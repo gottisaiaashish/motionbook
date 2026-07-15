@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.1.5/dist/mindar-image.prod.js"></script>
+</head>
+<body>
+  <h1>Compiling...</h1>
+  <script>
+    async function compile() {
+      try {
+        const compiler = new MINDAR.IMAGE.Compiler();
+        
+        // Load image
+        const img = new Image();
+        img.src = "/WhatsApp%20Image%202026-07-15%20at%204.26.15%20PM.jpeg";
+        await new Promise(r => { img.onload = r; });
+
+        console.log("Image loaded, compiling...");
+        await compiler.compileImageTargets([img], (progress) => {
+          console.log("Progress:", progress);
+        });
+
+        console.log("Compiled! Exporting...");
+        const exported = compiler.exportData();
+        
+        console.log("Uploading to backend...");
+        const blob = new Blob([exported]);
+        await fetch("http://localhost:5000/api/auth/save-mind", {
+          method: "POST",
+          body: blob
+        });
+        
+        console.log("Done!");
+        document.body.innerHTML += "<p>Done!</p>";
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    compile();
+  </script>
+</body>
+</html>

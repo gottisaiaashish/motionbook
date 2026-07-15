@@ -3,12 +3,28 @@ import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import dns from 'dns';
+import fs from 'fs';
 
 dns.setServers(['8.8.8.8', '8.8.4.4']);
 dns.setDefaultResultOrder('ipv4first');
 
 const app = express();
 const port = process.env.PORT || 5000;
+
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? 'https://motionbook.vercel.app' 
+    : ['http://localhost:5173', 'http://127.0.0.1:5173'],
+  credentials: true
+}));
+app.use(express.json());
+
+// Temporary route to save the mind file from the compiler html
+app.post('/api/auth/save-mind', express.raw({ type: '*/*', limit: '50mb' }), (req, res) => {
+  fs.writeFileSync('../frontend/public/targets.mind', req.body);
+  console.log('Saved targets.mind successfully');
+  res.send('OK');
+});
 
 // ── Routes ────────────────────────────────────────────────────────────────────
 import authRoutes from './routes/authRoutes.js';
@@ -20,7 +36,6 @@ import adminRoutes from './routes/adminRoutes.js';
 import albumRoutes from './routes/albumRoutes.js';
 
 // ── Middleware ─────────────────────────────────────────────────────────────────
-app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 

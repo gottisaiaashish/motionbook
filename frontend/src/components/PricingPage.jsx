@@ -213,6 +213,10 @@ export default function PricingPage() {
   };
 
   const handlePurchase = async () => {
+    if (!localStorage.getItem("token")) {
+      navigate("/login");
+      return;
+    }
     setProcessing(true);
     try {
       const plansRes = await getPlans();
@@ -264,7 +268,13 @@ export default function PricingPage() {
       rzp.on("payment.failed", function (response) { alert(response.error.description); });
       rzp.open();
     } catch (err) {
-      alert(err.message || "Something went wrong.");
+      if (err.message.includes('token failed') || err.message.includes('Not authorized')) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        navigate('/login');
+      } else {
+        alert(err.message || "Something went wrong.");
+      }
     } finally {
       setProcessing(false);
     }

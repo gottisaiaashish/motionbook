@@ -12,33 +12,74 @@ export default function ScanPage() {
   
   const videoRef = useRef(null);
 
-  // Simulated AI detection for AR effect
+  // Real AI detection for AR effect
   useEffect(() => {
-    if (matchedVideo) return;
+    if (!scanning || matchedVideo) return;
     
-    // Simulate finding a photo
-    const detectionTimer = setTimeout(() => {
-      setDetectionState("detecting");
+    let isActive = true;
+    let scanTimeout;
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    const performScan = async () => {
+      if (!isActive) return;
       
-      // Simulate locking onto the photo and auto-playing
-      const lockTimer = setTimeout(() => {
-        setDetectionState("locked");
+      const video = videoRef.current;
+      if (!video || video.readyState !== 4) {
+        scanTimeout = setTimeout(performScan, 500);
+        return;
+      }
+      
+      try {
+        // Draw frame to canvas
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         
-        // Auto-match random video for demo purposes if mediaItems is loaded
-        if (mediaItems.length > 0) {
-          const randomVideo = mediaItems[Math.floor(Math.random() * mediaItems.length)].videoUrl;
-          setMatchedVideo(randomVideo);
-          setScanning(false);
+        // Downscale to save bandwidth (max width 400px)
+        const targetWidth = 400;
+        const scale = targetWidth / canvas.width;
+        const tempCanvas = document.createElement("canvas");
+        tempCanvas.width = targetWidth;
+        tempCanvas.height = canvas.height * scale;
+        const tempCtx = tempCanvas.getContext("2d");
+        tempCtx.drawImage(canvas, 0, 0, tempCanvas.width, tempCanvas.height);
+        
+        const imageDataUrl = tempCanvas.toDataURL("image/jpeg", 0.6);
+
+        // Import scanImage from api dynamically or if imported at top
+        const { scanImage } = await import('../api.js');
+        const result = await scanImage(imageDataUrl);
+        
+        if (result.match && isActive) {
+          setDetectionState("detecting");
+          setTimeout(() => {
+            if (!isActive) return;
+            setDetectionState("locked");
+            setTimeout(() => {
+              if (!isActive) return;
+              setMatchedVideo(result.videoUrl);
+              setScanning(false);
+            }, 800);
+          }, 300);
+          return; // Stop scanning once matched
         }
-      }, 1500);
+      } catch (err) {
+        console.error("Scan error", err);
+      }
+      
+      if (isActive) {
+        scanTimeout = setTimeout(performScan, 1000); // 1 scan per second
+      }
+    };
 
-      return () => clearTimeout(lockTimer);
-    }, 2500);
+    scanTimeout = setTimeout(performScan, 1000);
 
-    return () => clearTimeout(detectionTimer);
-  }, [matchedVideo, mediaItems]);
-
-  useEffect(() => {
+    return () => {
+      isActive = false;
+      clearTimeout(scanTimeout);
+    };
+  }, [scanning, matchedVideo]);
     fetchMedia();
   }, []);
 

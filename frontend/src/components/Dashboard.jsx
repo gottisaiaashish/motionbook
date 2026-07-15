@@ -328,7 +328,7 @@ export default function Dashboard() {
                     onDragLeave={() => setDragOver(null)}
                     onDrop={(e) => handleDrop(e, "image")}
                   >
-                    <input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files[0])} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" disabled={uploading} />
+                    <input type="file" accept="image/jpeg, image/png, image/webp" onChange={(e) => setImageFile(e.target.files[0])} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" disabled={uploading} />
                     {imageFile ? (
                       <div className="absolute inset-0 p-2">
                         <img src={URL.createObjectURL(imageFile)} alt="Preview" className="w-full h-full object-cover rounded-xl" />

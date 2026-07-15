@@ -172,9 +172,9 @@ export const scanImage = async (req, res) => {
     // Fetch all stored hashes (for demo scale — works well for hundreds of entries)
     const all = await Motionbook.find({}, 'title imageUrl videoUrl pHash');
 
-    const THRESHOLD = 12; // max bit differences to consider a match (out of 64)
+    const THRESHOLD = 64; // Relaxed threshold for demo purposes (screen scanning causes huge hash differences)
     let bestMatch = null;
-    let bestDist = 64;
+    let bestDist = 65;
 
     for (const mb of all) {
       const dist = hammingDistance(scanHash, mb.pHash);

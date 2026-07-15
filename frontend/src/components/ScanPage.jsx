@@ -192,29 +192,34 @@ export default function ScanPage() {
           )}
         </AnimatePresence>
 
-        {/* Video Player overlay when matched */}
+        {/* Video Player overlay when matched (AR Mode) */}
         <AnimatePresence>
           {matchedVideo && (
             <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ type: "spring", stiffness: 200, damping: 20 }}
-              className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/90 backdrop-blur-xl p-4"
+              className="absolute inset-0 z-30 flex flex-col items-center justify-center pointer-events-none p-4"
             >
-              <div className="w-full max-w-lg aspect-[9/16] bg-black rounded-3xl overflow-hidden shadow-[0_0_100px_rgba(255,107,0,0.2)] border border-white/10 relative">
+              {/* This mimics the scanner box size but plays the video inside it */}
+              <div className="w-[85vw] max-w-md aspect-[3/4] rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(255,107,0,0.5)] border border-white/30 relative pointer-events-auto bg-black/50 backdrop-blur-sm">
                 <video 
                   src={matchedVideo} 
                   autoPlay 
-                  controls 
+                  loop
                   playsInline 
-                  className="w-full h-full object-contain"
+                  muted // Required for iOS auto-play
+                  className="absolute inset-0 w-full h-full object-cover"
                 />
                 <button 
                   onClick={() => { setMatchedVideo(null); setScanning(true); setDetectionState("searching"); }}
-                  className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center border border-white/20 text-white hover:bg-white/20 transition-colors"
+                  className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center border border-white/20 text-white hover:bg-white/20 transition-colors z-40"
                 >
                   <X className="w-5 h-5" />
                 </button>
+              </div>
+              <div className="absolute bottom-20 left-0 right-0 text-center text-white/90 drop-shadow-lg font-medium">
+                Tap the X to scan another photo
               </div>
             </motion.div>
           )}

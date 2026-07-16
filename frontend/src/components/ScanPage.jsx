@@ -4,27 +4,10 @@ import { X } from "lucide-react";
 import { getMyMotionbooks } from "../api";
 
 export default function ScanPage() {
-  const [videoUrl, setVideoUrl] = useState("");
+  // Hardcoding a public test video since this is a public scanner
+  const [videoUrl, setVideoUrl] = useState("https://cdn.aframe.io/videos/bunny.mp4");
   const [errorMsg, setErrorMsg] = useState("");
   const videoRef = useRef(null);
-
-  useEffect(() => {
-    // Fetch the user's motionbook to get the video URL
-    const fetchMedia = async () => {
-      try {
-        const res = await getMyMotionbooks();
-        if (res.data && res.data.length > 0) {
-          setVideoUrl(res.data[0].videoUrl);
-        } else {
-          setErrorMsg("No motionbook found. Please upload one first.");
-        }
-      } catch (err) {
-        console.error(err);
-        setErrorMsg("Please login first to access your AR Experience.");
-      }
-    };
-    fetchMedia();
-  }, []);
 
   // When A-Frame target is found, play the video
   useEffect(() => {
@@ -69,7 +52,7 @@ export default function ScanPage() {
       {/* A-Frame Scene */}
       {videoUrl ? (
         <a-scene 
-          mindar-image="imageTargetSrc: /targets.mind; autoStart: true; maxTrack: 1" 
+          mindar-image="imageTargetSrc: https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/image-tracking/assets/card-example/card.mind; autoStart: true; maxTrack: 1" 
           color-space="sRGB" 
           renderer="colorManagement: true, physicallyCorrectLights" 
           vr-mode-ui="enabled: false" 

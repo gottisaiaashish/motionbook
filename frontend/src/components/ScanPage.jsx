@@ -69,7 +69,7 @@ export default function ScanPage() {
       {/* A-Frame Scene */}
       {videoUrl ? (
         <a-scene 
-          mindar-image="imageTargetSrc: https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/image-tracking/assets/card-example/card.mind; autoStart: true; maxTrack: 1" 
+          mindar-image="imageTargetSrc: /targets.mind; autoStart: true; maxTrack: 1" 
           color-space="sRGB" 
           renderer="colorManagement: true, physicallyCorrectLights" 
           vr-mode-ui="enabled: false" 

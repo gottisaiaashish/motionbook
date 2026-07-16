@@ -47,13 +47,6 @@ export const register = async (name, email, password, otp) => {
 };
 
 export const login = async (email, password) => {
-  if (email === 'test@test.com' && password === '123456') {
-    const data = { token: 'fake-token', name: 'Test User' };
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('user', JSON.stringify(data));
-    return data;
-  }
-
   const response = await fetch(`${API_URL}/login`, {
     method: 'POST',
     headers: {
@@ -152,16 +145,6 @@ export const scanImage = async (imageDataUrl) => {
  * Fetch all motionbooks belonging to the logged-in user.
  */
 export const getMyMotionbooks = async () => {
-  if (localStorage.getItem('token') === 'fake-token') {
-    return {
-      data: [
-        {
-          videoUrl: 'https://cdn.aframe.io/videos/bunny.mp4',
-        }
-      ]
-    };
-  }
-
   const response = await fetch(`${API_MB_URL}/my`, {
     headers: getAuthHeader(),
   });

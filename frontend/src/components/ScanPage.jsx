@@ -5,6 +5,7 @@ import { getMyMotionbooks } from "../api";
 
 export default function ScanPage() {
   const [videoUrl, setVideoUrl] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
   const videoRef = useRef(null);
 
   useEffect(() => {
@@ -14,9 +15,12 @@ export default function ScanPage() {
         const res = await getMyMotionbooks();
         if (res.data && res.data.length > 0) {
           setVideoUrl(res.data[0].videoUrl);
+        } else {
+          setErrorMsg("No motionbook found. Please upload one first.");
         }
       } catch (err) {
         console.error(err);
+        setErrorMsg("Please login first to access your AR Experience.");
       }
     };
     fetchMedia();
@@ -65,7 +69,7 @@ export default function ScanPage() {
       {/* A-Frame Scene */}
       {videoUrl ? (
         <a-scene 
-          mindar-image="imageTargetSrc: /targets.mind; autoStart: true; maxTrack: 1" 
+          mindar-image="imageTargetSrc: https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/image-tracking/assets/card-example/card.mind; autoStart: true; maxTrack: 1" 
           color-space="sRGB" 
           renderer="colorManagement: true, physicallyCorrectLights" 
           vr-mode-ui="enabled: false" 
@@ -91,6 +95,11 @@ export default function ScanPage() {
             <a-video src="#ar-video" position="0 0 0" height="1.33" width="1" rotation="0 0 0"></a-video>
           </a-entity>
         </a-scene>
+      ) : errorMsg ? (
+        <div className="flex flex-col items-center justify-center h-full text-white px-4 text-center z-[100]">
+          <p className="text-red-400 mb-4">{errorMsg}</p>
+          <Link to="/" onClick={() => window.location.reload()} className="px-4 py-2 bg-white text-black rounded-full font-bold">Go to Home & Login</Link>
+        </div>
       ) : (
         <div className="flex items-center justify-center h-full text-white">Loading AR Experience...</div>
       )}
